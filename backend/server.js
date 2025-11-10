@@ -574,33 +574,71 @@ app.post("/register", async (req, res) => {
     res.json({ success: false, message: "Internal Server Error", error: error.message });
   }
 });
-
 app.post("/register_registrar", upload.single("profile_picture"), async (req, res) => {
-  const { employee_id, last_name, middle_name, first_name, role, email, password, status, dprtmnt_id } = req.body;
-  const file = req.file; // optional
-
-  if (!employee_id || !last_name || !first_name || !role || !email || !password || !dprtmnt_id) {
-    return res.status(400).json({ message: "All required fields must be filled" });
-  }
-
   try {
-    const [existing] = await db3.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
+    const {
+      employee_id,
+      last_name,
+      middle_name,
+      first_name,
+      role,
+      email,
+      password,
+      status,
+      dprtmnt_id
+    } = req.body;
+    const file = req.file;
+
+    // 🧩 Validate required fields
+    if (!employee_id || !last_name || !first_name || !role || !email || !password || !dprtmnt_id) {
+      return res.status(400).json({ message: "All required fields must be filled" });
+    }
+
+    // 🧠 Normalize email before checking duplicates
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 🧩 Check for duplicate email
+    const [existing] = await db3.query(
+      "SELECT * FROM user_accounts WHERE LOWER(email) = ?",
+      [normalizedEmail]
+    );
     if (existing.length > 0) {
+      console.warn("⚠️ Duplicate email detected:", normalizedEmail);
       return res.status(400).json({ message: "Email already exists" });
     }
 
+    // 🔒 Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 👤 Create person record first
     const [personInsert] = await db3.query("INSERT INTO person_table () VALUES ()");
     const person_id = personInsert.insertId;
 
-    const profilePicName = file ? `${employee_id}_${Date.now()}${path.extname(file.originalname)}` : null;
-    if (file) fs.writeFileSync(path.join(__dirname, "uploads", profilePicName), file.buffer);
+    // 🖼️ Handle file upload
+    let profilePicName = null;
+    if (file) {
+      profilePicName = `${employee_id}_${Date.now()}${path.extname(file.originalname)}`;
+      fs.writeFileSync(path.join(__dirname, "uploads", profilePicName), file.buffer);
+    }
 
+    // 💾 Save registrar record
     await db3.query(
       `INSERT INTO user_accounts 
        (person_id, employee_id, last_name, middle_name, first_name, role, email, password, status, dprtmnt_id, profile_picture) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [person_id, employee_id, last_name, middle_name, first_name, role, email.toLowerCase(), hashedPassword, status || 1, dprtmnt_id, profilePicName]
+      [
+        person_id,
+        employee_id,
+        last_name,
+        middle_name,
+        first_name,
+        role,
+        normalizedEmail,
+        hashedPassword,
+        status || 1,
+        dprtmnt_id,
+        profilePicName,
+      ]
     );
 
     res.status(201).json({ message: "Registrar account created successfully!" });
@@ -7816,6 +7854,19 @@ app.get("/api/professors", async (req, res) => {
 app.post("/api/register_prof", upload.single("profileImage"), async (req, res) => {
   try {
     const { person_id, fname, mname, lname, email, password, dprtmnt_id, role } = req.body;
+
+    const [existingUser] = await db3.query(
+      "SELECT * FROM prof_table WHERE email = ?",
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.json({
+        success: false,
+        error: "Email already exists. Please use a different email.",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let profileImage = null;
@@ -7838,13 +7889,12 @@ app.post("/api/register_prof", upload.single("profileImage"), async (req, res) =
     const sql2 = `INSERT INTO dprtmnt_profs_table (dprtmnt_id, prof_id) VALUES (?, ?)`;
     await db3.query(sql2, [dprtmnt_id, prof_id]);
 
-    res.status(201).json({ message: "Professor added successfully" });
+    res.status(201).json({success: true, message: "Professor added successfully" });
   } catch (err) {
     console.error("Insert error:", err);
-    res.status(500).json({ error: "Failed to add professor" });
+    res.json({ success: false, error: "Failed to add professor" });
   }
 });
-
 
 // Update professor info
 app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) => {
@@ -7856,7 +7906,7 @@ app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) 
     const [existingRows] = await db3.query(checkSQL, [email, id]);
 
     if (existingRows.length > 0) {
-      return res.status(400).json({ error: "Email already exists for another professor." });
+      return res.json({ success: false, error: "Email already exists for another professor." });
     }
 
     let profileImage = req.file ? req.file.filename : null;
@@ -7918,11 +7968,9 @@ app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) 
 
     res.json({ success: true, message: "Professor updated successfully." });
   } catch (err) {
-    console.error("Error updating professor:", err);
-    res.status(500).json({ error: "Internal server error." });
+    res.json({success: false, error: "Internal server error." });
   }
 });
-
 
 // Toggle professor status (Active/Inactive)
 app.put("/api/update_prof_status/:id", async (req, res) => {

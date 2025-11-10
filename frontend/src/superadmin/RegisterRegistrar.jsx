@@ -264,8 +264,21 @@ const RegisterRegistrar = () => {
             fetchRegistrars();
         } catch (err) {
             console.error("❌ Submit error:", err);
-            setErrorMessage(err.response?.data?.message || "Something went wrong");
+
+            const backendMessage = err.response?.data?.message;
+
+            // 🧠 Show clear error message on UI
+            if (backendMessage === "Email already exists") {
+                setErrorMessage("Email already exists. Please use a different email.");
+            } else if (backendMessage === "All required fields must be filled") {
+                setErrorMessage("Please complete all required fields before submitting.");
+            } else {
+                setErrorMessage(backendMessage || "Something went wrong. Please try again.");
+            }
+
+            setOpenSnackbar(true);
         }
+
     };
 
 
@@ -927,17 +940,17 @@ const RegisterRegistrar = () => {
                 </DialogActions>
             </Dialog>
 
-
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={3000}
                 onClose={() => setOpenSnackbar(false)}
                 anchorOrigin={{ vertical: "top", horizontal: "center" }}
             >
-                <Alert severity="success" sx={{ width: "100%" }}>
-                    Registrar registered successfully!
+                <Alert severity={errorMessage.includes("successfully") ? "success" : "error"} sx={{ width: "100%" }}>
+                    {errorMessage}
                 </Alert>
             </Snackbar>
+
         </Box>
     );
 }

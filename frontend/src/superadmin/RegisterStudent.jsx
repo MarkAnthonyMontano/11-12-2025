@@ -348,7 +348,7 @@ const RegisterStudents = () => {
 
     const filteredStudent = Students
         .filter((r) => {
-        const fullText = `${r.first_name || ""} ${r.middle_name || ""} ${r.last_name || ""} ${r.email || ""}`.toLowerCase();
+        const fullText = `${r.student_number} ${r.first_name || ""} ${r.middle_name || ""} ${r.last_name || ""} ${r.email || ""}`.toLowerCase();
         const matchesSearch = fullText.includes(searchQuery);
         const matchesDepartment =
             selectedDepartmentFilter === "" || r.dprtmnt_name === selectedDepartmentFilter;
@@ -411,7 +411,7 @@ const RegisterStudents = () => {
                 {/* Right: Search */}
                 <TextField
                   variant="outlined"
-                  placeholder="Search by name or email"
+                  placeholder="Search Student Name / Email / Student Number"
                   size="small"
                   value={searchQuery}
                   onChange={(p) => {
