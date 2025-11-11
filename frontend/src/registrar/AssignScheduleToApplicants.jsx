@@ -84,7 +84,7 @@ const AssignScheduleToApplicants = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
   const tabs = [
     {
@@ -142,20 +142,23 @@ const AssignScheduleToApplicants = () => {
 
   const pageId = 11;
 
-  //
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
 
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -164,9 +167,9 @@ const AssignScheduleToApplicants = () => {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
@@ -467,7 +470,7 @@ const AssignScheduleToApplicants = () => {
       setSnack({ open: true, message: "No unassigned applicants available.", severity: "warning" });
       return;
     }
-    
+
     socket.emit("update_schedule", { schedule_id: selectedSchedule, applicant_numbers: unassigned });
 
     socket.once("update_schedule_result", (res) => {
@@ -759,7 +762,7 @@ const AssignScheduleToApplicants = () => {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: titleColor,  
+            color: titleColor,
             fontSize: '36px',
           }}
         >
@@ -817,8 +820,8 @@ const AssignScheduleToApplicants = () => {
               justifyContent: "center",
               cursor: "pointer",
               borderRadius: 2,
-              border: `2px solid ${borderColor}`, 
-                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+              border: `2px solid ${borderColor}`,
+              backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
               color: activeStep === index ? "#fff" : "#000",
               boxShadow:
                 activeStep === index
@@ -1170,11 +1173,15 @@ const AssignScheduleToApplicants = () => {
 
       <TableContainer component={Paper} sx={{ width: '100%', }}>
         <Table size="small">
-          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2",
- color: "white" }}>
+          <TableHead sx={{
+            backgroundColor: settings?.header_color || "#1976d2",
+            color: "white"
+          }}>
             <TableRow>
-              <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2",
- color: "white" }}>
+              <TableCell colSpan={10} sx={{
+                border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2",
+                color: "white"
+              }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   {/* Left: Total Count */}
                   <Typography fontSize="14px" fontWeight="bold" color="white">

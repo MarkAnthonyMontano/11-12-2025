@@ -3755,6 +3755,7 @@ app.post("/login", async (req, res) => {
         ua.person_id,
         ua.email,
         ua.password,
+        ua.employee_id,
         ua.role,
         NULL AS profile_image,
         NULL AS fname,
@@ -3776,6 +3777,7 @@ app.post("/login", async (req, res) => {
         ua.person_id,
         ua.email,
         ua.password,
+        ua.employee_id,
         ua.role,
         ua.profile_image,
         ua.fname,
@@ -3860,7 +3862,7 @@ app.post("/login", async (req, res) => {
 
     // ✅ Generate JWT
     const token = webtoken.sign(
-      { person_id: user.person_id, email: user.email, role: user.role, department: user.department },
+      { person_id: user.person_id, employee_id: user.employee_id, email: user.email, role: user.role, department: user.department },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
@@ -3871,14 +3873,18 @@ app.post("/login", async (req, res) => {
       success: true,
       email: user.email,
       role: user.role,
+      employee_id: user.employee_id,
       person_id: user.person_id,
       department: user.dprtmnt_id,
     });
+
+    console.log("User Employee ID", user.employee_id, typeof user.employee_id);
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error during login" });
   }
 });
+
 
 
 // ----------------- LOGIN (Applicant) -----------------

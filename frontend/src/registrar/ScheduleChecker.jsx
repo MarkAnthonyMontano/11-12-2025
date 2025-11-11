@@ -55,34 +55,37 @@ const ScheduleChecker = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
 
-// Also put it at the very top
-const [userID, setUserID] = useState("");
-const [user, setUser] = useState("");
-const [userRole, setUserRole] = useState("");
+  // Also put it at the very top
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
 
-const [hasAccess, setHasAccess] = useState(null);
-const [loading, setLoading] = useState(false);
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
 
 
-const pageId = 56;
+  const pageId = 56;
 
-//Put this After putting the code of the past code
-useEffect(() => {
-    
+  const [employeeID, setEmployeeID] = useState("");
+
+  useEffect(() => {
+
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -91,25 +94,26 @@ useEffect(() => {
     }
   }, []);
 
-const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-        if (response.data && response.data.page_privilege === 1) {
-          setHasAccess(true);
-        } else {
-          setHasAccess(false);
-        }
-    } catch (error) {
-        console.error('Error checking access:', error);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
         setHasAccess(false);
-        if (error.response && error.response.data.message) {
-          console.log(error.response.data.message);
-        } else {
-          console.log("An unexpected error occurred.");
-        }
-        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error checking access:', error);
+      setHasAccess(false);
+      if (error.response && error.response.data.message) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("An unexpected error occurred.");
+      }
+      setLoading(false);
     }
   };
+
 
 
 
@@ -386,7 +390,7 @@ const checkAccess = async (userID) => {
 
   const handleDelete = async (scheduleId) => {
     if (!window.confirm("Are you sure you want to delete this schedule?")) return;
-    
+
     try {
       const res = await axios.delete(
         `http://localhost:5000/api/delete/schedule/${scheduleId}`
@@ -398,11 +402,11 @@ const checkAccess = async (userID) => {
         const page_name = "Schedule Plotting";
         const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
         const type = "delete"
-  
+
         await axios.post(`http://localhost:5000/insert-logs/faculty/${profData.prof_id}`, {
           message: `Employee ID #${profData.prof_id} - ${fullName} successfully delete schedule in ${page_name}`, type: type,
         });
-  
+
       } catch (err) {
         console.error("Error inserting audit log");
       }
@@ -530,9 +534,8 @@ const checkAccess = async (userID) => {
 
       return (
         <span
-          className={`relative inline-block text-center ${
-            totalHours === 1 ? "text-[10px]" : "text-[11px]"
-          }`}
+          className={`relative inline-block text-center ${totalHours === 1 ? "text-[10px]" : "text-[11px]"
+            }`}
           style={{ marginTop }}
         >
           {text}
@@ -544,12 +547,12 @@ const checkAccess = async (userID) => {
     return "";
   };
 
-  
-  
+
+
 
   // Put this at the very bottom before the return 
   if (loading || hasAccess === null) {
-    return <LoadingOverlay open={loading} message="Check Access"/>;
+    return <LoadingOverlay open={loading} message="Check Access" />;
   }
 
   if (!hasAccess) {
@@ -561,15 +564,15 @@ const checkAccess = async (userID) => {
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
-  <Box
+      <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-  
+
           mb: 2,
-     
+
         }}
       >
         <Typography
@@ -580,10 +583,10 @@ const checkAccess = async (userID) => {
             fontSize: '36px',
           }}
         >
-    SCHEDULE CHECKER
+          SCHEDULE CHECKER
         </Typography>
 
-      
+
 
 
       </Box>
@@ -778,7 +781,7 @@ const checkAccess = async (userID) => {
             <div className="flex justify-between">
               <button
                 className="bg-[#800000] hover:bg-red-900 text-white px-6 py-2 rounded"
-                style={{backgroundColor: mainButtonColor,}}
+                style={{ backgroundColor: mainButtonColor, }}
                 onClick={handleSubmit}
               >
                 Check Schedule
@@ -876,39 +879,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("7:00 AM", "8:00 AM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("7:00 AM", "8:00 AM", day) &&
-                      hasAdjacentSchedule("7:00 AM", "8:00 AM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("7:00 AM", "8:00 AM", day) &&
-                      hasAdjacentSchedule(
-                        "7:00 AM",
-                        "8:00 AM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("7:00 AM", "8:00 AM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("7:00 AM", "8:00 AM", day) &&
+                          hasAdjacentSchedule("7:00 AM", "8:00 AM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("7:00 AM", "8:00 AM", day) &&
+                          hasAdjacentSchedule(
+                            "7:00 AM",
+                            "8:00 AM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("7:00 AM", day)}
                     </div>
@@ -928,39 +927,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("8:00 AM", "9:00 AM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("8:00 AM", "9:00 AM", day) &&
-                      hasAdjacentSchedule("8:00 AM", "9:00 AM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("8:00 AM", "9:00 AM", day) &&
-                      hasAdjacentSchedule(
-                        "8:00 AM",
-                        "9:00 AM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("8:00 AM", "9:00 AM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("8:00 AM", "9:00 AM", day) &&
+                          hasAdjacentSchedule("8:00 AM", "9:00 AM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("8:00 AM", "9:00 AM", day) &&
+                          hasAdjacentSchedule(
+                            "8:00 AM",
+                            "9:00 AM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("8:00 AM", day)}
                     </div>
@@ -980,39 +975,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("9:00 AM", "10:00 AM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("9:00 AM", "10:00 AM", day) &&
-                      hasAdjacentSchedule("9:00 AM", "10:00 AM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("9:00 AM", "10:00 AM", day) &&
-                      hasAdjacentSchedule(
-                        "9:00 AM",
-                        "10:00 AM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("9:00 AM", "10:00 AM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("9:00 AM", "10:00 AM", day) &&
+                          hasAdjacentSchedule("9:00 AM", "10:00 AM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("9:00 AM", "10:00 AM", day) &&
+                          hasAdjacentSchedule(
+                            "9:00 AM",
+                            "10:00 AM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("9:00 AM", day)}
                     </div>
@@ -1032,43 +1023,39 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("10:00 AM", "11:00 AM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("10:00 AM", "11:00 AM", day) &&
-                      hasAdjacentSchedule(
-                        "10:00 AM",
-                        "11:00 AM",
-                        day,
-                        "top"
-                      ) === "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("10:00 AM", "11:00 AM", day) &&
-                      hasAdjacentSchedule(
-                        "10:00 AM",
-                        "11:00 AM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("10:00 AM", "11:00 AM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("10:00 AM", "11:00 AM", day) &&
+                          hasAdjacentSchedule(
+                            "10:00 AM",
+                            "11:00 AM",
+                            day,
+                            "top"
+                          ) === "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("10:00 AM", "11:00 AM", day) &&
+                          hasAdjacentSchedule(
+                            "10:00 AM",
+                            "11:00 AM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("10:00 AM", day)}
                     </div>
@@ -1088,43 +1075,39 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("11:00 AM", "12:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("11:00 AM", "12:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "11:00 AM",
-                        "12:00 PM",
-                        day,
-                        "top"
-                      ) === "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("11:00 AM", "12:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "11:00 AM",
-                        "12:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("11:00 AM", "12:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("11:00 AM", "12:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "11:00 AM",
+                            "12:00 PM",
+                            day,
+                            "top"
+                          ) === "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("11:00 AM", "12:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "11:00 AM",
+                            "12:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("11:00 AM", day)}
                     </div>
@@ -1144,39 +1127,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("12:00 PM", "1:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("12:00 PM", "1:00 PM", day) &&
-                      hasAdjacentSchedule("12:00 PM", "1:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("12:00 PM", "1:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "12:00 PM",
-                        "1:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("12:00 PM", "1:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("12:00 PM", "1:00 PM", day) &&
+                          hasAdjacentSchedule("12:00 PM", "1:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("12:00 PM", "1:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "12:00 PM",
+                            "1:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("12:00 PM", day)}
                     </div>
@@ -1196,39 +1175,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("1:00 PM", "2:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("1:00 PM", "2:00 PM", day) &&
-                      hasAdjacentSchedule("1:00 PM", "2:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("1:00 PM", "2:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "1:00 PM",
-                        "2:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("1:00 PM", "2:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("1:00 PM", "2:00 PM", day) &&
+                          hasAdjacentSchedule("1:00 PM", "2:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("1:00 PM", "2:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "1:00 PM",
+                            "2:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("1:00 PM", day)}
                     </div>
@@ -1248,39 +1223,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("2:00 PM", "3:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("2:00 PM", "3:00 PM", day) &&
-                      hasAdjacentSchedule("2:00 PM", "3:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("2:00 PM", "3:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "2:00 PM",
-                        "3:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("2:00 PM", "3:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("2:00 PM", "3:00 PM", day) &&
+                          hasAdjacentSchedule("2:00 PM", "3:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("2:00 PM", "3:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "2:00 PM",
+                            "3:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("2:00 PM", day)}
                     </div>
@@ -1300,39 +1271,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("3:00 PM", "4:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("3:00 PM", "4:00 PM", day) &&
-                      hasAdjacentSchedule("3:00 PM", "4:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("3:00 PM", "4:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "3:00 PM",
-                        "4:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("3:00 PM", "4:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("3:00 PM", "4:00 PM", day) &&
+                          hasAdjacentSchedule("3:00 PM", "4:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("3:00 PM", "4:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "3:00 PM",
+                            "4:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("3:00 PM", day)}
                     </div>
@@ -1352,39 +1319,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("4:00 PM", "5:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("4:00 PM", "5:00 PM", day) &&
-                      hasAdjacentSchedule("4:00 PM", "5:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("4:00 PM", "5:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "4:00 PM",
-                        "5:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("4:00 PM", "5:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("4:00 PM", "5:00 PM", day) &&
+                          hasAdjacentSchedule("4:00 PM", "5:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("4:00 PM", "5:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "4:00 PM",
+                            "5:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("4:00 PM", day)}
                     </div>
@@ -1404,39 +1367,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("5:00 PM", "6:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("5:00 PM", "6:00 PM", day) &&
-                      hasAdjacentSchedule("5:00 PM", "6:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("5:00 PM", "6:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "5:00 PM",
-                        "6:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("5:00 PM", "6:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("5:00 PM", "6:00 PM", day) &&
+                          hasAdjacentSchedule("5:00 PM", "6:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("5:00 PM", "6:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "5:00 PM",
+                            "6:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("5:00 PM", day)}
                     </div>
@@ -1456,39 +1415,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("6:00 PM", "7:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("6:00 PM", "7:00 PM", day) &&
-                      hasAdjacentSchedule("6:00 PM", "7:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("6:00 PM", "7:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "6:00 PM",
-                        "7:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("6:00 PM", "7:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("6:00 PM", "7:00 PM", day) &&
+                          hasAdjacentSchedule("6:00 PM", "7:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("6:00 PM", "7:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "6:00 PM",
+                            "7:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("6:00 PM", day)}
                     </div>
@@ -1508,39 +1463,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("7:00 PM", "8:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("7:00 PM", "8:00 PM", day) &&
-                      hasAdjacentSchedule("7:00 PM", "8:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("7:00 PM", "8:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "7:00 PM",
-                        "8:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("7:00 PM", "8:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("7:00 PM", "8:00 PM", day) &&
+                          hasAdjacentSchedule("7:00 PM", "8:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("7:00 PM", "8:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "7:00 PM",
+                            "8:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("7:00 PM", day)}
                     </div>
@@ -1560,39 +1511,35 @@ const checkAccess = async (userID) => {
                 (day, i) => (
                   <td
                     key={day}
-                    className={`m-0 p-0 ${
-                      day === "WED"
+                    className={`m-0 p-0 ${day === "WED"
                         ? "min-w-[7rem]"
                         : day === "THU"
-                        ? "min-w-[6.9rem]"
-                        : "min-w-[6.8rem]"
-                    }`}
+                          ? "min-w-[6.9rem]"
+                          : "min-w-[6.8rem]"
+                      }`}
                   >
                     <div
                       className={`h-[2.5rem] border border-black border-t-0 border-l-0 text-[14px] flex items-center justify-center  
-                    ${
-                      isTimeInSchedule("8:00 PM", "9:00 PM", day)
-                        ? "bg-yellow-300"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("8:00 PM", "9:00 PM", day) &&
-                      hasAdjacentSchedule("8:00 PM", "9:00 PM", day, "top") ===
-                        "same"
-                        ? "border-t-0"
-                        : ""
-                    } 
-                    ${
-                      isTimeInSchedule("8:00 PM", "9:00 PM", day) &&
-                      hasAdjacentSchedule(
-                        "8:00 PM",
-                        "9:00 PM",
-                        day,
-                        "bottom"
-                      ) === "same"
-                        ? "border-b-0"
-                        : ""
-                    }`}
+                    ${isTimeInSchedule("8:00 PM", "9:00 PM", day)
+                          ? "bg-yellow-300"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("8:00 PM", "9:00 PM", day) &&
+                          hasAdjacentSchedule("8:00 PM", "9:00 PM", day, "top") ===
+                          "same"
+                          ? "border-t-0"
+                          : ""
+                        } 
+                    ${isTimeInSchedule("8:00 PM", "9:00 PM", day) &&
+                          hasAdjacentSchedule(
+                            "8:00 PM",
+                            "9:00 PM",
+                            day,
+                            "bottom"
+                          ) === "same"
+                          ? "border-b-0"
+                          : ""
+                        }`}
                     >
                       {getCenterText("8:00 PM", day)}
                     </div>

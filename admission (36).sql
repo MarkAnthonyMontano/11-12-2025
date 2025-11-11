@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2025 at 09:44 AM
+-- Generation Time: Nov 11, 2025 at 04:52 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -596,7 +596,7 @@ CREATE TABLE `email_templates` (
 --
 
 INSERT INTO `email_templates` (`template_id`, `sender_name`, `department_id`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'collegeofcomputingstudies@gmail.com', 1, 1, '2025-09-09 03:52:56', '2025-11-10 13:03:56'),
+(1, 'collegeofcomputingstudies@gmail.com', 5, 1, '2025-09-09 03:52:56', '2025-11-11 15:03:50'),
 (2, 'collegeofengineering@gmail.com', 1, 1, '2025-09-09 03:54:30', '2025-09-09 05:24:09');
 
 -- --------------------------------------------------------

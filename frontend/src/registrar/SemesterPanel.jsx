@@ -55,34 +55,37 @@ const SemesterPanel = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
-
-  
-// Also put it at the very top
-const [userID, setUserID] = useState("");
-const [user, setUser] = useState("");
-const [userRole, setUserRole] = useState("");
-
-const [hasAccess, setHasAccess] = useState(null);
-const [loading, setLoading] = useState(false);
+  }, [settings]);
 
 
-const pageId = 61;
+  // Also put it at the very top
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
 
-//Put this After putting the code of the past code
-useEffect(() => {
-    
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+
+  const pageId = 61;
+
+  const [employeeID, setEmployeeID] = useState("");
+
+  useEffect(() => {
+
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -91,25 +94,26 @@ useEffect(() => {
     }
   }, []);
 
-const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-        if (response.data && response.data.page_privilege === 1) {
-          setHasAccess(true);
-        } else {
-          setHasAccess(false);
-        }
-    } catch (error) {
-        console.error('Error checking access:', error);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
         setHasAccess(false);
-        if (error.response && error.response.data.message) {
-          console.log(error.response.data.message);
-        } else {
-          console.log("An unexpected error occurred.");
-        }
-        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error checking access:', error);
+      setHasAccess(false);
+      if (error.response && error.response.data.message) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("An unexpected error occurred.");
+      }
+      setLoading(false);
     }
   };
+
 
 
 
@@ -167,10 +171,10 @@ const checkAccess = async (userID) => {
 
 
 
-// Put this at the very bottom before the return 
-if (loading || hasAccess === null) {
-   return <LoadingOverlay open={loading} message="Check Access"/>;
-}
+  // Put this at the very bottom before the return 
+  if (loading || hasAccess === null) {
+    return <LoadingOverlay open={loading} message="Check Access" />;
+  }
 
   if (!hasAccess) {
     return (
@@ -187,9 +191,9 @@ if (loading || hasAccess === null) {
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-      
+
           mb: 2,
-       
+
         }}
       >
         <Typography
@@ -215,7 +219,7 @@ if (loading || hasAccess === null) {
       <Grid container spacing={4}>
         {/* Form Section */}
         <Grid item xs={12} md={5}>
-          <Paper elevation={3} sx={{ p: 3, border: `2px solid ${borderColor}`,      borderRadius: 2, }}>
+          <Paper elevation={3} sx={{ p: 3, border: `2px solid ${borderColor}`, borderRadius: 2, }}>
             <Typography variant="h6" sx={{ mb: 2, color: subtitleColor }}>
               Add Semester
             </Typography>
@@ -246,7 +250,7 @@ if (loading || hasAccess === null) {
 
         {/* Display Section */}
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ p: 3, border: `2px solid ${borderColor}`,      borderRadius: 2, }}>
+          <Paper elevation={3} sx={{ p: 3, border: `2px solid ${borderColor}`, borderRadius: 2, }}>
             <Typography variant="h6" sx={{ mb: 2, color: subtitleColor }}>
               Saved Semesters
             </Typography>

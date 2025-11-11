@@ -63,18 +63,23 @@ const CurriculumPanel = () => {
 
   const pageId = 18;
 
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
+
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -83,19 +88,22 @@ const CurriculumPanel = () => {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/page_access/${userID}/${pageId}`
-      );
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
         setHasAccess(false);
       }
     } catch (error) {
-      console.error("Error checking access:", error);
+      console.error('Error checking access:', error);
       setHasAccess(false);
+      if (error.response && error.response.data.message) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("An unexpected error occurred.");
+      }
       setLoading(false);
     }
   };

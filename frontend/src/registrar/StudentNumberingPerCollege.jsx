@@ -45,44 +45,44 @@ import SearchIcon from "@mui/icons-material/Search";
 const socket = io("http://localhost:5000");
 
 const StudentNumbering = () => {
-const settings = useContext(SettingsContext);
+    const settings = useContext(SettingsContext);
 
-  const [titleColor, setTitleColor] = useState("#000000");
-  const [subtitleColor, setSubtitleColor] = useState("#555555");
-  const [borderColor, setBorderColor] = useState("#000000");
-  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-  const [fetchedLogo, setFetchedLogo] = useState(null);
-  const [companyName, setCompanyName] = useState("");
-  const [shortTerm, setShortTerm] = useState("");
-  const [campusAddress, setCampusAddress] = useState("");
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
 
-  useEffect(() => {
-    if (!settings) return;
+    useEffect(() => {
+        if (!settings) return;
 
-    // 🎨 Colors
-    if (settings.title_color) setTitleColor(settings.title_color);
-    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-    if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-    // 🏫 Logo
-    if (settings.logo_url) {
-      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-    } else {
-      setFetchedLogo(EaristLogo);
-    }
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
 
-    // 🏷️ School Information
-    if (settings.company_name) setCompanyName(settings.company_name);
-    if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+    }, [settings]);
 
 
     const tabs = [
@@ -174,20 +174,23 @@ const settings = useContext(SettingsContext);
 
     const pageId = 63;
 
-    //Put this After putting the code of the past code
+    const [employeeID, setEmployeeID] = useState("");
+
     useEffect(() => {
 
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -196,9 +199,9 @@ const settings = useContext(SettingsContext);
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -215,7 +218,6 @@ const settings = useContext(SettingsContext);
             setLoading(false);
         }
     };
-
 
 
 
@@ -562,7 +564,7 @@ const settings = useContext(SettingsContext);
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h4" fontWeight="bold" sx={{color: titleColor}}>
+                <Typography variant="h4" fontWeight="bold" sx={{ color: titleColor }}>
                     ASSIGN STUDENT NUMBER FOR COLLEGES
                 </Typography>
 
@@ -613,8 +615,8 @@ const settings = useContext(SettingsContext);
                             justifyContent: "center",
                             cursor: "pointer",
                             borderRadius: 2,
-                       border: `2px solid ${borderColor}`, 
-                     backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                            border: `2px solid ${borderColor}`,
+                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             boxShadow:
                                 activeStep === index

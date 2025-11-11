@@ -1,93 +1,67 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SettingsContext } from "../App";
 
 import {
-  ListAlt,
   PersonAdd,
   LockReset,
   People,
-  AssignmentInd,
-  TableChart,
-  Security,
   School,
   SupervisorAccount,
   AdminPanelSettings,
   Info,
+  TableChart,
+  Security,
 } from "@mui/icons-material";
+
 import { Link } from "react-router-dom";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import axios from "axios";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
-
 const AccountDashboard = () => {
-
   const settings = useContext(SettingsContext);
 
   const [titleColor, setTitleColor] = useState("#000000");
-  const [subtitleColor, setSubtitleColor] = useState("#555555");
   const [borderColor, setBorderColor] = useState("#000000");
   const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-  const [fetchedLogo, setFetchedLogo] = useState(null);
-  const [companyName, setCompanyName] = useState("");
-  const [shortTerm, setShortTerm] = useState("");
-  const [campusAddress, setCampusAddress] = useState("");
-
-  useEffect(() => {
-    if (!settings) return;
-
-    // 🎨 Colors
-    if (settings.title_color) setTitleColor(settings.title_color);
-    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-    if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
-
-    // 🏫 Logo
-    if (settings.logo_url) {
-      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-    } else {
-      setFetchedLogo(EaristLogo);
-    }
-
-    // 🏷️ School Information
-    if (settings.company_name) setCompanyName(settings.company_name);
-    if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
-
-  }, [settings]);
-
-
-  // Also put it at the very top
+  // Access control
   const [userID, setUserID] = useState("");
-  const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
-
+  const [employeeID, setEmployeeID] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Access List Map
+  const [userAccessList, setUserAccessList] = useState({});
 
-  const pageId = 97;
+  const pageId = 97; // ACCOUNT MANAGEMENT
 
-  //Put this After putting the code of the past code
+  // Apply settings
   useEffect(() => {
+    if (!settings) return;
 
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+    setTitleColor(settings.title_color || "#000000");
+    setBorderColor(settings.border_color || "#000000");
+    setMainButtonColor(settings.main_button_color || "#1976d2");
+  }, [settings]);
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
+  // Load user & access
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    const role = localStorage.getItem("role");
+    const id = localStorage.getItem("person_id");
+    const empID = localStorage.getItem("employee_id");
 
-      if (storedRole === "registrar") {
-        checkAccess(storedID);
+    if (email && role && id && empID) {
+      setUserID(id);
+      setUserRole(role);
+      setEmployeeID(empID);
+
+      if (role === "registrar") {
+        checkAccess(empID);
+        fetchUserAccessList(empID);
       } else {
         window.location.href = "/login";
       }
@@ -96,67 +70,89 @@ const AccountDashboard = () => {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-      if (response.data && response.data.page_privilege === 1) {
-        setHasAccess(true);
-      } else {
-        setHasAccess(false);
-      }
-    } catch (error) {
-      console.error('Error checking access:', error);
+      setLoading(true);
+      const res = await axios.get(
+        `http://localhost:5000/api/page_access/${employeeID}/${pageId}`
+      );
+      setHasAccess(res.data?.page_privilege === 1);
+    } catch (err) {
       setHasAccess(false);
-      if (error.response && error.response.data.message) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("An unexpected error occurred.");
-      }
+    } finally {
       setLoading(false);
     }
   };
 
+  // ✅ ACCESS LOADER
+  const fetchUserAccessList = async (employeeID) => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:5000/api/page_access/${employeeID}`
+      );
+
+      const accessMap = data.reduce((acc, item) => {
+        acc[item.page_id] = item.page_privilege === 1;
+        return acc;
+      }, {});
+
+      setUserAccessList(accessMap);
+    } catch (err) {
+      console.error("Access list error:", err);
+    }
+  };
+
+  // ✅ REAL PAGE IDs BASED ON YOUR DATABASE
+  const groupedMenu = [
+    {
+      label: "RESET PASSWORD ",
+      items: [
+        { title: "RESET PASSWORD", path: "/registrar_reset_password", icon: LockReset, page_id: 76 },
+
+      ],
+    },
+    {
+      label: "ACCOUNT CREATION",
+      items: [
+        { title: "ADD FACULTY ACCOUNTS", path: "/register_prof", icon: PersonAdd, page_id: 73 },
+        { title: "ADD REGISTRAR ACCOUNT", path: "/register_registrar", icon: PersonAdd, page_id: 74 },
+        { title: "ADD STUDENT ACCOUNT", path: "/register_student", icon: PersonAdd, page_id: 75 },
+      ],
+    },
+
+    {
+      label: "ACCOUNT INFORMATION",
+      items: [
+        { title: "APPLICANT INFORMATION", path: "/super_admin_applicant_dashboard1", icon: Info, page_id: 78 },
+        { title: "STUDENT INFORMATION", path: "/super_admin_student_dashboard1", icon: Info, page_id: 87 },
+      ],
+    },
+
+    {
+      label: "USER PAGE ACCESS & PAGE TABLE",
+      items: [
+        { title: "USER PAGE ACCESS", path: "/user_page_access", icon: Security, page_id: 72 },
+        { title: "PAGE TABLE", path: "/page_crud", icon: TableChart, page_id: 72 },
+      ],
+    },
+
+    {
+      label: "RESET PASSWORD MANAGEMENT",
+      items: [
+
+        { title: "APPLICANT RESET PASSWORD", path: "/superadmin_applicant_reset_password", icon: People, page_id: 84 },
+        { title: "STUDENT RESET PASSWORD", path: "/superadmin_student_reset_password", icon: School, page_id: 92 },
+        { title: "FACULTY RESET PASSWORD", path: "/superadmin_faculty_reset_password", icon: SupervisorAccount, page_id: 85 },
+        { title: "REGISTRAR RESET PASSWORD", path: "/superadmin_registrar_reset_password", icon: AdminPanelSettings, page_id: 86 },
+      ],
+    },
+  ];
 
 
+  if (loading || hasAccess === null)
+    return <LoadingOverlay open={loading} message="Checking Access..." />;
 
-
-
-
-
-
-
-  // Put this at the very bottom before the return 
-  if (loading || hasAccess === null) {
-    return <LoadingOverlay open={loading} message="Check Access" />;
-  }
-
-  if (!hasAccess) {
-    return (
-      <Unauthorized />
-    );
-  }
-
-
-
-
-
-
-
-const menuItems = [
-  { label: "ADD FACULTY ACCOUNTS", icon: <PersonAdd style={{ fontSize: 36 }} />, path: "/register_prof" },
-  { label: "ADD REGISTRAR'S ACCOUNT", icon: <PersonAdd style={{ fontSize: 36 }} />, path: "/register_registrar" },
-  { label: "ADD STUDENT'S ACCOUNT", icon: <PersonAdd style={{ fontSize: 36 }} />, path: "/register_student" },
-  { label: "APPLICANT INFORMATION", icon: <Info style={{ fontSize: 36 }} />, path: "/super_admin_applicant_dashboard1" },
-  { label: "STUDENT INFORMATION", icon: <Info style={{ fontSize: 36 }} />, path: "/super_admin_student_dashboard1" },
-  { label: "USER PAGE ACCESS", icon: <Security style={{ fontSize: 36 }} />, path: "/user_page_access" },
-  { label: "PAGE TABLE", icon: <TableChart style={{ fontSize: 36 }} />, path: "/page_crud" },
-  { label: "RESET PASSWORD", icon: <LockReset style={{ fontSize: 36 }} />, path: "/registrar_reset_password" },
-  { label: "APPLICANT RESET PASSWORD", icon: <People style={{ fontSize: 36 }} />, path: "/superadmin_applicant_reset_password" },
-  { label: "STUDENT RESET PASSWORD", icon: <School style={{ fontSize: 36 }} />, path: "/superadmin_student_reset_password" },
-  { label: "FACULTY RESET PASSWORD", icon: <SupervisorAccount style={{ fontSize: 36 }} />, path: "/superadmin_faculty_reset_password" },
-  { label: "REGISTRAR RESET PASSWORD", icon: <AdminPanelSettings style={{ fontSize: 36 }} />, path: "/superadmin_registrar_reset_password" },
-];
-
+  if (!hasAccess) return <Unauthorized />;
 
   return (
     <Box
@@ -167,55 +163,83 @@ const menuItems = [
         backgroundColor: "transparent",
       }}
     >
-      <div className="p-2 px-10 w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {menuItems.map((item, index) => (
-            <div className="relative" key={index}>
-              <Link to={item.path}>
+      {groupedMenu
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => userAccessList[item.page_id]),
+        }))
+        .filter((group) => group.items.length > 0)
+        .map((group, idx) => (
+          <Box key={idx} sx={{ mb: 5 }}>
+            {/* Header */}
+            <Box
+              sx={{
+                borderBottom: `4px solid ${borderColor}`,
+                mb: 2,
+                pb: 1,
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: "bold",
+                  color: titleColor,
+                  textTransform: "uppercase",
+                  fontSize: "34px",
+                }}
+              >
+                {group.label}
+              </Typography>
+            </Box>
 
-                {/* ICON BOX */}
-                <div
-                  className="absolute left-16 top-12 rounded-lg p-4 w-enough"
-                  style={{
-                    backgroundColor: "white",
-                    border: `5px solid ${borderColor}`,
-                    color: titleColor,
-                    transition: "0.2s ease-in-out",
-                  }}
-                >
-                  {item.icon}
-                </div>
+            {/* Items */}
+            <div className="p-2 px-10 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {group.items.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div className="relative" key={i}>
+                    <Link to={item.path}>
+                      {/* ICON BOX */}
+                      <div
+                        className="bg-white p-4 rounded-lg absolute left-16 top-12"
+                        style={{
+                          border: `5px solid ${borderColor}`,
+                          color: titleColor,
+                          transition: "0.2s ease-in-out",
+                        }}
+                      >
+                        <Icon sx={{ fontSize: 36, color: titleColor }} />
+                      </div>
 
-                {/* MAIN BUTTON */}
-                <button
-                  className="rounded-lg p-4 w-80 h-36 font-medium mt-20 ml-8 flex items-end justify-center"
-                  style={{
-                    backgroundColor: "white",
-                    color: titleColor,
-                    border: `5px solid ${borderColor}`,
-                    cursor: "pointer",
-                    transition: "0.2s ease-in-out",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = mainButtonColor;
-                    e.currentTarget.style.color = "#ffffff";
-                    e.currentTarget.style.border = `5px solid ${borderColor}`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "white";
-                    e.currentTarget.style.color = titleColor;
-                    e.currentTarget.style.border = `5px solid ${borderColor}`;
-                  }}
-                >
-                  {item.label}
-                </button>
-
-              </Link>
+                      {/* HOVERABLE BUTTON */}
+                      <button
+                        className="bg-white rounded-lg p-4 w-80 h-36 font-medium mt-20 ml-8 flex items-end justify-center"
+                        style={{
+                          border: `5px solid ${borderColor}`,
+                          color: titleColor,
+                          transition: "0.2s ease-in-out",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = mainButtonColor;
+                          e.currentTarget.style.color = "#ffffff";
+                          e.currentTarget.style.border = `5px solid ${borderColor}`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "white";
+                          e.currentTarget.style.color = titleColor;
+                          e.currentTarget.style.border = `5px solid ${borderColor}`;
+                        }}
+                      >
+                        {item.title}
+                      </button>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-
-        </div>
-      </div>
+          </Box>
+        ))}
     </Box>
   );
 };

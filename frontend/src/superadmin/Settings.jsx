@@ -18,7 +18,7 @@ import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 function Settings({ onUpdate }) {
-    
+
     // User states
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
@@ -29,21 +29,23 @@ function Settings({ onUpdate }) {
 
     const pageId = 77;
 
-    // ✅ New state for short term
-    const [shortTerm, setShortTerm] = useState("");
+    const [employeeID, setEmployeeID] = useState("");
 
     useEffect(() => {
+
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -52,9 +54,9 @@ function Settings({ onUpdate }) {
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -63,6 +65,11 @@ function Settings({ onUpdate }) {
         } catch (error) {
             console.error('Error checking access:', error);
             setHasAccess(false);
+            if (error.response && error.response.data.message) {
+                console.log(error.response.data.message);
+            } else {
+                console.log("An unexpected error occurred.");
+            }
             setLoading(false);
         }
     };
@@ -118,7 +125,7 @@ function Settings({ onUpdate }) {
                     main_button_color,
                     sub_button_color,
                     border_color,
-                   
+
                     font_theme_color,
                     title_color,
                     subtitle_color
@@ -138,8 +145,8 @@ function Settings({ onUpdate }) {
 
 
                 setBorderColor(border_color || "#000000");
-              
-  
+
+
                 setTitleColor(title_color || "#000000");
                 setSubtitleColor(subtitle_color || "#555555");
 
@@ -169,7 +176,7 @@ function Settings({ onUpdate }) {
         formData.append("footer_color", footerColor || "#ffffff");
         formData.append("main_button_color", mainButtonColor);
         formData.append("sub_button_color", subButtonColor);
-        formData.append("border_color", borderColor); 
+        formData.append("border_color", borderColor);
         formData.append("title_color", titleColor);
         formData.append("subtitle_color", subtitleColor);
 
@@ -261,7 +268,7 @@ function Settings({ onUpdate }) {
                     maxWidth: "600px",
                     borderRadius: 4,
                     backgroundColor: "#fff",
-                    border: `2px solid ${borderColor}`, 
+                    border: `2px solid ${borderColor}`,
                     boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
                     mb: 12,
                 }}
@@ -479,8 +486,8 @@ function Settings({ onUpdate }) {
                         />
                     </Box>
 
-                   
-                 
+
+
 
 
                     {/* ✅ Save Button */}

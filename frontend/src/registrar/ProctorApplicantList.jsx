@@ -34,7 +34,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const ProctorApplicantList = () => {
   const settings = useContext(SettingsContext);
- const [titleColor, setTitleColor] = useState("#000000");
+  const [titleColor, setTitleColor] = useState("#000000");
   const [subtitleColor, setSubtitleColor] = useState("#555555");
   const [borderColor, setBorderColor] = useState("#000000");
   const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
@@ -69,7 +69,7 @@ const ProctorApplicantList = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
   const words = companyName.trim().split(" ");
   const middle = Math.ceil(words.length / 2);
@@ -104,20 +104,23 @@ const ProctorApplicantList = () => {
 
   const pageId = 37;
 
-  //Put this After putting the code of the past code
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
 
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -126,9 +129,9 @@ const ProctorApplicantList = () => {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
@@ -502,8 +505,8 @@ const ProctorApplicantList = () => {
               justifyContent: "center",
               cursor: "pointer",
               borderRadius: 2,
-                border: `2px solid ${borderColor}`, 
-                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+              border: `2px solid ${borderColor}`,
+              backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
               color: activeStep === index ? "#fff" : "#000",
               boxShadow:
                 activeStep === index

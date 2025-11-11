@@ -44,7 +44,7 @@ const YearLevelPanel = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
   // Also put it at the very top
   const [userID, setUserID] = useState("");
@@ -57,20 +57,23 @@ const YearLevelPanel = () => {
 
   const pageId = 66;
 
-  //Put this After putting the code of the past code
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
 
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -79,9 +82,9 @@ const YearLevelPanel = () => {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
@@ -177,7 +180,7 @@ const YearLevelPanel = () => {
           flexWrap: 'wrap',
 
           mb: 2,
-   
+
         }}
       >
         <Typography
@@ -218,7 +221,7 @@ const YearLevelPanel = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" gutterBottom sx={{color: subtitleColor, }}>
+          <Typography variant="h6" gutterBottom sx={{ color: subtitleColor, }}>
             Add Year Level
           </Typography>
           <TextField
@@ -231,8 +234,8 @@ const YearLevelPanel = () => {
           <Button
             fullWidth
             variant="contained"
-            sx={{ mt: 2,  backgroundColor: "1967d2", ":hover": { bgcolor: "#000000" } }}
-            
+            sx={{ mt: 2, backgroundColor: "1967d2", ":hover": { bgcolor: "#000000" } }}
+
             onClick={handleAddYearLevel}
           >
             Save
@@ -247,12 +250,12 @@ const YearLevelPanel = () => {
             bgcolor: "#fff",
             boxShadow: 2,
             borderRadius: 2,
-           border: `2px solid ${borderColor}`,
+            border: `2px solid ${borderColor}`,
             overflowY: "auto",
             maxHeight: 500,
           }}
         >
-          <Typography variant="h6" gutterBottom sx={{color: subtitleColor, }}>
+          <Typography variant="h6" gutterBottom sx={{ color: subtitleColor, }}>
             Registered Year Levels
           </Typography>
           <Box sx={{ overflowY: "auto", maxHeight: 400 }}>

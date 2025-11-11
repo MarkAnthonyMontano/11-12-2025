@@ -157,7 +157,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
     try {
       setLoading3(true); // show overlay when verifying OTP
 
-      const res = await axios.post("http://localhost:5000/verify-otp", {
+      await axios.post("http://localhost:5000/verify-otp", {
         email: tempLoginData.email,
         otp,
       });
@@ -167,6 +167,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
       localStorage.setItem("role", tempLoginData.role);
       localStorage.setItem("person_id", tempLoginData.person_id);
       localStorage.setItem("department", tempLoginData.department || "");
+      localStorage.setItem("employee_id", tempLoginData.employee_id);
 
       setIsAuthenticated(true);
 

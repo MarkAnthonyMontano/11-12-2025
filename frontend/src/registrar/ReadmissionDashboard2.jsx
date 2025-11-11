@@ -111,20 +111,23 @@ const ReadmissionDashboard2 = () => {
 
     const pageId = 42;
 
-    //Put this After putting the code of the past code
+    const [employeeID, setEmployeeID] = useState("");
+
     useEffect(() => {
 
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -133,9 +136,9 @@ const ReadmissionDashboard2 = () => {
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -152,7 +155,6 @@ const ReadmissionDashboard2 = () => {
             setLoading(false);
         }
     };
-
 
 
     // do not alter
@@ -620,7 +622,7 @@ const ReadmissionDashboard2 = () => {
 
             <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
                 <Table>
-                       <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
+                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
                         <TableRow>
                             {/* Left cell: Student Number */}
                             <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
@@ -1983,7 +1985,7 @@ const ReadmissionDashboard2 = () => {
                             <Button
                                 variant="contained"
                                 component={Link}
-                                 to={`/readmission_dashboard1?person_id=${userID}`}
+                                to={`/readmission_dashboard1?person_id=${userID}`}
                                 startIcon={
                                     <ArrowBackIcon
                                         sx={{

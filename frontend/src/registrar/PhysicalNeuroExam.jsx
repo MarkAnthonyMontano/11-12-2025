@@ -36,42 +36,42 @@ import SearchIcon from "@mui/icons-material/Search";
 const PhysicalNeuroExam = () => {
     const settings = useContext(SettingsContext);
 
-  const [titleColor, setTitleColor] = useState("#000000");
-  const [subtitleColor, setSubtitleColor] = useState("#555555");
-  const [borderColor, setBorderColor] = useState("#000000");
-  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-  const [fetchedLogo, setFetchedLogo] = useState(null);
-  const [companyName, setCompanyName] = useState("");
-  const [shortTerm, setShortTerm] = useState("");
-  const [campusAddress, setCampusAddress] = useState("");
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
 
-  useEffect(() => {
-    if (!settings) return;
+    useEffect(() => {
+        if (!settings) return;
 
-    // 🎨 Colors
-    if (settings.title_color) setTitleColor(settings.title_color);
-    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-    if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-    // 🏫 Logo
-    if (settings.logo_url) {
-      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-    } else {
-      setFetchedLogo(EaristLogo);
-    }
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
 
-    // 🏷️ School Information
-    if (settings.company_name) setCompanyName(settings.company_name);
-    if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+    }, [settings]);
 
 
 
@@ -95,20 +95,23 @@ const PhysicalNeuroExam = () => {
 
     const pageId = 36;
 
-    //Put this After putting the code of the past code
+    const [employeeID, setEmployeeID] = useState("");
+
     useEffect(() => {
 
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -117,9 +120,9 @@ const PhysicalNeuroExam = () => {
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -137,7 +140,8 @@ const PhysicalNeuroExam = () => {
         }
     };
 
-  
+
+
 
     const [searchQuery, setSearchQuery] = useState("");
     const [searchError, setSearchError] = useState("");
@@ -377,7 +381,7 @@ const PhysicalNeuroExam = () => {
     const [medicalData, setMedicalData] = useState(null);
     const [personResults, setPersonResults] = useState([]);
 
-   
+
 
     // Fetch person by student number or name
     const fetchByStudentNumber = async (number) => {
@@ -563,8 +567,8 @@ const PhysicalNeuroExam = () => {
                             justifyContent: "center",
                             borderRadius: 2,
                             cursor: "pointer",
-                           border: `2px solid ${borderColor}`,
-                                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                            border: `2px solid ${borderColor}`,
+                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             transition: "0.3s ease",
                             "&:hover": {
@@ -613,7 +617,7 @@ const PhysicalNeuroExam = () => {
                 maxWidth="100%"
                 sx={{
                     backgroundColor: "#f1f1f1",
-            border: `2px solid ${borderColor}`,
+                    border: `2px solid ${borderColor}`,
                     padding: 4,
                     borderRadius: 2,
                     boxShadow: 3,
@@ -652,7 +656,7 @@ const PhysicalNeuroExam = () => {
                                 transition: "all 0.3s ease-in-out",
                                 "&:hover": {
                                     transform: "scale(1.05)",
-                                   backgroundColor: settings?.header_color || "#1976d2",
+                                    backgroundColor: settings?.header_color || "#1976d2",
                                     "& .card-text": { color: "#fff" },
                                     "& .card-icon": { color: "#fff" },
                                 },

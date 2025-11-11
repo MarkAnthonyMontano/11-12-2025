@@ -78,20 +78,23 @@ export default function EmailTemplateManager() {
 
   const pageId = 70;
 
-  //Put this After putting the code of the past code
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
 
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -100,9 +103,9 @@ export default function EmailTemplateManager() {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
@@ -119,6 +122,7 @@ export default function EmailTemplateManager() {
       setLoading(false);
     }
   };
+
 
 
 
@@ -416,34 +420,34 @@ export default function EmailTemplateManager() {
                         <TableCell>{r.is_active ? "Yes" : "No"}</TableCell>
 
                         {/* Actions */}
-                     <TableCell sx={{ width: "150px" }}>
-  <Box sx={{ display: "flex", gap: 1 }}>
-    <Button
-      variant="contained"
-      size="small"
-      sx={{
-        backgroundColor: "#4CAF50",
-        color: "white",
-        "&:hover": { backgroundColor: "#45A049" },
-      }}
-      onClick={() => handleEdit(r)}
-    >
-      Edit
-    </Button>
-    <Button
-      variant="contained"
-      size="small"
-      sx={{
-        backgroundColor: "#B22222",
-        color: "white",
-        "&:hover": { backgroundColor: "#8B0000" },
-      }}
-      onClick={() => handleDelete(r.template_id)}
-    >
-      Delete
-    </Button>
-  </Box>
-</TableCell>
+                        <TableCell sx={{ width: "150px" }}>
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              sx={{
+                                backgroundColor: "#4CAF50",
+                                color: "white",
+                                "&:hover": { backgroundColor: "#45A049" },
+                              }}
+                              onClick={() => handleEdit(r)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              sx={{
+                                backgroundColor: "#B22222",
+                                color: "white",
+                                "&:hover": { backgroundColor: "#8B0000" },
+                              }}
+                              onClick={() => handleDelete(r.template_id)}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        </TableCell>
 
                       </TableRow>
                     ))

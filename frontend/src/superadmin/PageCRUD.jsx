@@ -94,20 +94,23 @@ const PageCRUD = () => {
 
     const pageId = 72;
 
-    //Put this After putting the code of the past code
+    const [employeeID, setEmployeeID] = useState("");
+
     useEffect(() => {
 
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -116,9 +119,9 @@ const PageCRUD = () => {
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -253,7 +256,7 @@ const PageCRUD = () => {
                     variant="h4"
                     sx={{
                         fontWeight: "bold",
-                       color: titleColor,
+                        color: titleColor,
                         fontSize: "36px",
                     }}
                 >
@@ -285,19 +288,19 @@ const PageCRUD = () => {
             <Paper
                 elevation={4}
                 sx={{
-                    border: `2px solid ${borderColor}`, 
+                    border: `2px solid ${borderColor}`,
                     overflow: "hidden",
                     backgroundColor: "#ffffff",
                 }}
             >
                 <TableContainer>
                     <Table>
-                        <TableHead sx={{   backgroundColor: settings?.header_color || "#1976d2",}}>
+                        <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                             <TableRow>
-                                <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`,  }}>#</TableCell>
-                                <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`,  }}>Page Description</TableCell>
-                                <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`,  }}>Page Group</TableCell>
-                                <TableCell align="center" sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`,  }}>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`, }}>#</TableCell>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`, }}>Page Description</TableCell>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`, }}>Page Group</TableCell>
+                                <TableCell align="center" sx={{ color: "white", fontWeight: "bold", border: `2px solid ${borderColor}`, }}>
                                     Actions
                                 </TableCell>
                             </TableRow>
@@ -306,10 +309,10 @@ const PageCRUD = () => {
                             {pages.length > 0 ? (
                                 pages.map((page, index) => (
                                     <TableRow key={page.id} hover>
-                                        <TableCell style={{ border: `2px solid ${borderColor}`,  }}>{index + 1}</TableCell>
-                                        <TableCell style={{ border: `2px solid ${borderColor}`,  }}>{page.page_description}</TableCell>
-                                        <TableCell style={{ border: `2px solid ${borderColor}`,  }}>{page.page_group}</TableCell>
-                                        <TableCell style={{ border: `2px solid ${borderColor}`,  }} align="center">
+                                        <TableCell style={{ border: `2px solid ${borderColor}`, }}>{index + 1}</TableCell>
+                                        <TableCell style={{ border: `2px solid ${borderColor}`, }}>{page.page_description}</TableCell>
+                                        <TableCell style={{ border: `2px solid ${borderColor}`, }}>{page.page_group}</TableCell>
+                                        <TableCell style={{ border: `2px solid ${borderColor}`, }} align="center">
                                             <Button
                                                 variant="contained"
                                                 size="small"

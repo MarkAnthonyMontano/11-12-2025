@@ -140,42 +140,42 @@ const remarksOptions = [
 const MedicalRequirements = () => {
     const settings = useContext(SettingsContext);
 
-  const [titleColor, setTitleColor] = useState("#000000");
-  const [subtitleColor, setSubtitleColor] = useState("#555555");
-  const [borderColor, setBorderColor] = useState("#000000");
-  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-  const [fetchedLogo, setFetchedLogo] = useState(null);
-  const [companyName, setCompanyName] = useState("");
-  const [shortTerm, setShortTerm] = useState("");
-  const [campusAddress, setCampusAddress] = useState("");
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
+    const [campusAddress, setCampusAddress] = useState("");
 
-  useEffect(() => {
-    if (!settings) return;
+    useEffect(() => {
+        if (!settings) return;
 
-    // 🎨 Colors
-    if (settings.title_color) setTitleColor(settings.title_color);
-    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-    if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-    // 🏫 Logo
-    if (settings.logo_url) {
-      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-    } else {
-      setFetchedLogo(EaristLogo);
-    }
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
 
-    // 🏷️ School Information
-    if (settings.company_name) setCompanyName(settings.company_name);
-    if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+    }, [settings]);
 
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(2);
@@ -264,20 +264,23 @@ const MedicalRequirements = () => {
 
     const pageId = 34;
 
-    //Put this After putting the code of the past code
+    const [employeeID, setEmployeeID] = useState("");
+
     useEffect(() => {
 
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -286,9 +289,9 @@ const MedicalRequirements = () => {
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -305,6 +308,7 @@ const MedicalRequirements = () => {
             setLoading(false);
         }
     };
+
 
 
 
@@ -938,16 +942,16 @@ const MedicalRequirements = () => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         flexWrap: 'wrap',
-                     
+
                         mb: 2,
-                      
+
                     }}
                 >
                     <Typography
                         variant="h4"
                         sx={{
                             fontWeight: 'bold',
-                             color: titleColor,
+                            color: titleColor,
                             fontSize: '36px',
                         }}
                     >
@@ -990,7 +994,7 @@ const MedicalRequirements = () => {
                                 justifyContent: "center",
                                 cursor: "pointer",
                                 borderRadius: 2,
-                            border: `2px solid ${borderColor}`,
+                                border: `2px solid ${borderColor}`,
                                 backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
                                 color: activeStep === index ? "#fff" : "#000",
                                 boxShadow:
@@ -1017,7 +1021,7 @@ const MedicalRequirements = () => {
                 {/* Student ID and Name */}
                 <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}` }}>
                     <Table>
-                        <TableHead sx={{  backgroundColor: settings?.header_color || "#1976d2",}}>
+                        <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                             <TableRow>
                                 {/* Left cell: Student ID */}
                                 <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
@@ -1046,7 +1050,7 @@ const MedicalRequirements = () => {
                 </TableContainer>
 
 
-                <TableContainer component={Paper} sx={{ width: '100%',  border: `2px solid ${borderColor}`,  }}>
+                <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                     {/* SHS GWA and Height row below Student Name */}
                     <Box sx={{ px: 2, mb: 2, mt: 2 }}>
                         {/* SHS GWA Field */}
@@ -1428,7 +1432,7 @@ const MedicalRequirements = () => {
                 <>
                     <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}` }}>
                         <Table>
-                            <TableHead sx={{   backgroundColor: settings?.header_color || "#1976d2", }}>
+                            <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                                 <TableRow>
                                     <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Document Type</TableCell>
                                     <TableCell sx={{ color: 'white', textAlign: "Center", border: `2px solid ${borderColor}` }}>Remarks</TableCell>

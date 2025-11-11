@@ -56,7 +56,7 @@ const SectionPanel = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
   // Also put it at the very top
   const [userID, setUserID] = useState("");
@@ -69,20 +69,23 @@ const SectionPanel = () => {
 
   const pageId = 60;
 
-  //Put this After putting the code of the past code
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
 
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -91,9 +94,9 @@ const SectionPanel = () => {
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
@@ -208,7 +211,7 @@ const SectionPanel = () => {
 
       <Box display="flex" gap={3}>
         {/* Left Form Section */}
-        <Paper elevation={3} sx={{ flex: 1, p: 3, border: `2px solid ${borderColor}`,  borderRadius: 2, }}>
+        <Paper elevation={3} sx={{ flex: 1, p: 3, border: `2px solid ${borderColor}`, borderRadius: 2, }}>
           <Typography style={{ color: subtitleColor }} variant="h6" gutterBottom>
             Section Description
           </Typography>
@@ -225,7 +228,7 @@ const SectionPanel = () => {
               <Button
                 type="submit"
                 variant="contained"
-                sx={{ backgroundColor:"primary", color: '#fff' }}
+                sx={{ backgroundColor: "primary", color: '#fff' }}
               >
                 Insert
               </Button>
@@ -234,8 +237,8 @@ const SectionPanel = () => {
         </Paper>
 
         {/* Right Table Display Section */}
-        <Paper elevation={3} sx={{ flex: 2, p: 3, border: `2px solid ${borderColor}`,  borderRadius: 2, }}>
-          <Typography style={{ color: subtitleColor}} variant="h6" gutterBottom>
+        <Paper elevation={3} sx={{ flex: 2, p: 3, border: `2px solid ${borderColor}`, borderRadius: 2, }}>
+          <Typography style={{ color: subtitleColor }} variant="h6" gutterBottom>
             Section List
           </Typography>
           <TableContainer sx={{ maxHeight: 400, overflowY: 'auto' }}>

@@ -65,6 +65,7 @@ const AdmissionDashboardPanel = () => {
   // 👤 User & Access Control
   const [userID, setUserID] = useState("");
   const [userRole, setUserRole] = useState("");
+  const [employeeID, setEmployeeID] = useState("");
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const [userAccessList, setUserAccessList] = useState({});
@@ -76,14 +77,15 @@ const AdmissionDashboardPanel = () => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
-    if (storedUser && storedRole && storedID) {
+    if (storedUser && storedRole && storedID && storedEmployeeID) {
       setUserRole(storedRole);
       setUserID(storedID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);            // ✅ Check if user can access THIS dashboard
-        fetchUserAccessList(storedID);    // ✅ Load all allowed pages for filtering
+        checkAccess(storedEmployeeID);      // ✅ Check if user can access THIS dashboard
+        fetchUserAccessList(storedEmployeeID);    // ✅ Load all allowed pages for filtering
       } else {
         window.location.href = "/login";
       }
@@ -93,10 +95,10 @@ const AdmissionDashboardPanel = () => {
   }, []);
 
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       setHasAccess(response.data?.page_privilege === 1);
     } catch (error) {
       console.error("Error checking access:", error);
@@ -106,9 +108,9 @@ const AdmissionDashboardPanel = () => {
     }
   };
 
-  const fetchUserAccessList = async (userId) => {
+  const fetchUserAccessList = async (employeeID) => {
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/page_access/${userId}`);
+      const { data } = await axios.get(`http://localhost:5000/api/page_access/${employeeID}`);
 
       const accessMap = data.reduce((acc, item) => {
         acc[item.page_id] = item.page_privilege === 1;
@@ -202,82 +204,97 @@ const AdmissionDashboardPanel = () => {
   if (!hasAccess) return <Unauthorized />;
 
   return (
-  <Box
-    sx={{
-      height: "calc(100vh - 150px)",
-      overflowY: "auto",
-      paddingRight: 1,
-      backgroundColor: "transparent",
-    }}
-  >
-    {groupedMenu
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item => userAccessList[item.page_id]), // keep only accessible items
-      }))
-      .filter(group => group.items.length > 0) // remove groups with no accessible items
-      .map((group, idx) => (
-        <Box key={idx} sx={{ mb: 5 }}>
-          {/* Group Title */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-              borderBottom: `2px solid ${borderColor}`,
-              width: "100%",
-              pb: 1,
-            }}
-          >
-            <Typography
-              variant="h4"
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+      }}
+    >
+      {groupedMenu
+        .map(group => ({
+          ...group,
+          items: group.items.filter(item => userAccessList[item.page_id]), // keep only accessible items
+        }))
+        .filter(group => group.items.length > 0) // remove groups with no accessible items
+        .map((group, idx) => (
+          <Box key={idx} sx={{ mb: 5 }}>
+            {/* Group Title */}
+            <Box
               sx={{
-                fontWeight: "bold",
-                color: titleColor,
-                textTransform: "uppercase",
-                fontSize: "34px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+                borderBottom: `4px solid ${borderColor}`,
+                width: "100%",
+                pb: 1,
               }}
             >
-              {group.label}
-            </Typography>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: "bold",
+                  color: titleColor,
+                  textTransform: "uppercase",
+                  fontSize: "34px",
+                }}
+              >
+                {group.label}
+              </Typography>
+            </Box>
+
+            {/* Group Items */}
+            <div className="p-2 px-10 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {group.items.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div className="relative" key={i}>
+                    <Link to={item.link}>
+                      {/* ICON BOX */}
+                      <div
+                        className="bg-white p-4 rounded-lg absolute left-16 top-12"
+                        style={{
+                          border: `5px solid ${borderColor}`,
+                          color: titleColor,
+                          transition: "0.2s ease-in-out",
+                        }}
+                      >
+                        <Icon sx={{ fontSize: 36, color: titleColor }} />
+                      </div>
+
+                      {/* HOVERABLE BUTTON */}
+                      <button
+                        className="bg-white rounded-lg p-4 w-80 h-36 font-medium mt-20 ml-8 flex items-end justify-center"
+                        style={{
+                          border: `5px solid ${borderColor}`,
+                          color: titleColor,
+                          transition: "0.2s ease-in-out",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = mainButtonColor;
+                          e.currentTarget.style.color = "#ffffff";
+                          e.currentTarget.style.border = `5px solid ${borderColor}`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "white";
+                          e.currentTarget.style.color = titleColor;
+                          e.currentTarget.style.border = `5px solid ${borderColor}`;
+                        }}
+                      >
+                        {item.title}
+                      </button>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
           </Box>
-
-          {/* Group Items */}
-          <div className="p-2 px-10 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {group.items.map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <div className="relative" key={i}>
-                  <Link to={item.link}>
-                    <div
-                      className="bg-white p-4 rounded-lg absolute left-16 top-12"
-                      style={{
-                        border: `5px solid ${borderColor}`,
-                        color: titleColor,
-                      }}
-                    >
-                      <Icon sx={{ fontSize: 36, color: titleColor }} />
-                    </div>
-
-                    <button
-                      className="bg-white rounded-lg p-4 w-80 h-36 font-medium mt-20 ml-8 flex items-end justify-center"
-                      style={{
-                        border: `5px solid ${borderColor}`,
-                        color: titleColor,
-                      }}
-                    >
-                      {item.title}
-                    </button>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </Box>
-      ))}
-  </Box>
-);
+        ))}
+    </Box>
+  );
 
 
 };

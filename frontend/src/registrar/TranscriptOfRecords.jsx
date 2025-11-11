@@ -166,6 +166,7 @@ const settings = useContext(SettingsContext);
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
+    const [employeeID, setEmployeeID] = useState("");
     const [studentData, setStudentData] = useState([]);
     const [studentNumber, setStudentNumber] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
@@ -195,9 +196,6 @@ const settings = useContext(SettingsContext);
         navigate(to); // this will actually change the page
     };
 
-
-
-
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -210,14 +208,16 @@ const settings = useContext(SettingsContext);
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -226,9 +226,9 @@ const settings = useContext(SettingsContext);
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -317,41 +317,67 @@ const settings = useContext(SettingsContext);
         subjects: courses
     }));
 
-    const subjectsPerPage = 30;
-    const chunkArray = (arr, size) => {
+    // Constants
+    const MAX_PAGE_HEIGHT_REM = 46;
+    const SUBJECT_HEIGHT_REM = 1.55;
+    const MAX_SUBJECTS_PER_PAGE = Math.floor(MAX_PAGE_HEIGHT_REM / SUBJECT_HEIGHT_REM);
+
+    // Function to chunk subjects into pages
+    const chunkArray = (arr, maxSubjects) => {
         const result = [];
-        let page = [];
-        let count = 0; // total subjects on current page
+        let currentPage = [];
+        let currentCount = 0;
 
         for (const group of arr) {
-            if (group.subjects.length > size) {
-                // Case 1: semester itself exceeds a page -> split inside subjects
-                let start = 0;
-                while (start < group.subjects.length) {
-                    const slice = group.subjects.slice(start, start + size);
-                    result.push([{ ...group, subjects: slice }]);
-                    start += size;
+            let remainingSubjects = [...group.subjects];
+            let isContinuation = false;
+
+            while (remainingSubjects.length > 0) {
+                const availableSpace = maxSubjects - currentCount;
+
+                if (remainingSubjects.length <= availableSpace) {
+                    // All subjects fit on this page
+                    currentPage.push({ 
+                        ...group, 
+                        subjects: remainingSubjects, 
+                        isContinuation 
+                    });
+                    currentCount += remainingSubjects.length;
+                    remainingSubjects = [];
+                } else {
+                    // Some subjects fit, others overflow → split group
+                    const fitSubjects = remainingSubjects.slice(0, availableSpace);
+                    const overflowSubjects = remainingSubjects.slice(availableSpace);
+
+                    currentPage.push({ 
+                        ...group, 
+                        subjects: fitSubjects, 
+                        isContinuation 
+                    });
+                    result.push(currentPage);
+
+                    // start new page with remaining subjects
+                    currentPage = [];
+                    currentCount = 0;
+                    remainingSubjects = overflowSubjects;
+                    isContinuation = true; // mark next split as continuation
                 }
-                count = 0;
-                page = [];
-            } else if (count + group.subjects.length > size) {
-                // Case 2: not enough space left -> push current page and start new
-                result.push(page);
-                page = [group];
-                count = group.subjects.length;
-            } else {
-                // Case 3: fits in current page
-                page.push(group);
-                count += group.subjects.length;
+
+                if (currentCount >= maxSubjects) {
+                    result.push(currentPage);
+                    currentPage = [];
+                    currentCount = 0;
+                }
             }
         }
 
-        if (page.length > 0) result.push(page);
+        if (currentPage.length > 0) result.push(currentPage);
+
         return result;
     };
 
 
-    const paginatedSubjects = chunkArray(groupedSubjects, subjectsPerPage);
+    const paginatedSubjects = chunkArray(groupedSubjects, MAX_SUBJECTS_PER_PAGE);
 
     const formattedDate = (dateString) => {
         if (!dateString) return "";
@@ -552,78 +578,89 @@ const settings = useContext(SettingsContext);
 
 
             <style>
-                {`
-                @media print {
-                    @page {
-                        margin: 0; 
-                        size: 215.9mm 330.2mm; 
-                    }
-
-                    .body{
-                        margin-top: -11rem;
-                        position: absolute !important;
-                        margin-left: -3.5rem;
-                        overflow: visible !important;  /* show all content */
-                        height: auto !important;       /* expand height */
-                        max-height: none !important;   /* no max height limit */
+                {`  
+                    @media print {
+                        @page {
+                            margin: 0; 
+                            padding: 0;
+                            size: 215.9mm 330.2mm;
+                        }
                         
-                    }
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-
-                    .page, .page * {
-                        visibility: visible !important;
-                    }
-
-                    .page {
-                        display: block !important; 
-                        page-break-after: always !important;
-                        break-after: page !important;
-                        page-break-inside: avoid !important;
-                        break-inside: avoid !important;
-                        
-                        min-width: 215.9mm !important;
-                        position: static !important;  /* <– remove absolute positioning */
-                        transform: none !important;   /* <– remove scaling/shifting */
-                        scale: 0.87 !important;
-                        overflowY: hidden;
-                        min-height: 330.2mm !important;
-                        margin: 0 auto !important;
-                    }
-
-                    .print-container{
-                        width: 100%;
-                        height: 100%;    
-                    }
-
-                    .print-container-2{
-                        margin-top: -7rem !important;
-                    }
+                        html, body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            height: auto;
+                            position: relative
+                        }
                     
-                    .print-container-3{
-                        margin-top: -9rem !important;
-                    }
+                        body * {
+                            visibility: hidden;
+                        }
+    
+                        .body, .page {
+                            display: block !important;
+                            overflow: visible !important;
+                            height: auto !important;
+                            max-height: none !important;
+                        }
 
-                    table, tr, td {
-                        page-break-inside: avoid !important;
-                        break-inside: avoid !important;
+                        .page {
+                            zoom: 0.8;
+                            position: absolute;
+                            top: 0;
+                        }
+
+                        .print-container, .print-container *, .page, .page *{
+                            visibility: visible;
+
+                        }
+
+                        .print-container {
+                            display: block;
+                            width: 100%;
+                            position: relative;
+                            margin-top: 0 !mportant;
+                            margin-bottom: 0 !mportant;
+                            margin-right: 0 !mportant;
+                            padding: 0 !important;
+                            min-height: 13.5in;
+                            margin-left: -23.5%;
+                            font-family: "Poppins", sans-serif;
+                        }
+
+                        .print-container:first-child {
+                            page-break-after: auto;
+                        }
+
+                        .print-container:last-child {
+                            page-break-after: auto;
+                            margin-top: 0;
+                        }
+
+                        .print-container:first-child .page-header{
+                            top: 0;
+                        }
+
+                        .page-header{
+                            height: 10rem !important;
+                        }
+                        
+                        .table{
+                            min-height: 70rem !important;
+                        }
+
+                        button {
+                            display: none !important; /* hide buttons */
+                        }
+                        
                     }
-                    button {
-                        display: none !important; /* hide buttons */
-                    }
-                    .navbars{
-                        display: none;
-                    }
-                }
                 `}
             </style>
-            <Box ref={divToPrintRef} className="page">
+            <Box ref={divToPrintRef} className="page" style={{minWidth: "215.9mm", minHeight: "330.9mm"}}>
                 {paginatedSubjects.map((pageGroups, pageIndex) => (
-                    <Box key={pageIndex} className={`print-container print-container-${pageIndex + 1}   `} style={{ pageBreakAfter: "always", breakAfter: "page", paddingRight: "1.5rem", marginTop: "3rem", paddingBottom: "1.5rem", minWidth: "215.9mm", minHeight: "330.9mm" }}>
+                    <Box key={pageIndex} className={`print-container print-container-${pageIndex + 1}`} style={{ pageBreakAfter: "always", breakAfter: "page", paddingRight: "1.5rem", marginTop: "3rem", paddingBottom: "1.5rem"}}>
                         {/* Start Of Header */}
-                        <Box style={{ display: "flex", alignItems: "center", width: "80rem", justifyContent: "center" }}>
+                        <Box className="page-header" style={{ display: "flex", alignItems: "center", height: "10rem", width: "80rem", justifyContent: "center" }}>
                             <Box style={{ paddingTop: "1.5rem", marginLeft: "-10rem", paddingRight: "3rem" }}>
                                 <img
                                     src={fetchedLogo || EaristLogo} // use dynamic logo if available
@@ -676,11 +713,11 @@ const settings = useContext(SettingsContext);
                             </Box>
 
                         </Box>
-                        <Typography style={{ marginLeft: "1rem", textAlign: "center", width: "80rem", fontSize: "1.6rem", letterSpacing: "-1px", fontWeight: "500" }}>OFFICE OF THE REGISTRAR</Typography>
-                        <Typography style={{ marginLeft: "1rem", marginTop: "-0.5rem", width: "80rem", textAlign: "center", fontSize: "2.75rem", letterSpacing: "-1px", fontWeight: "600" }}>OFFICIAL TRANSCRIPT OF RECORDS</Typography>
+                        <Typography style={{height: "1.5rem", marginLeft: "1rem", textAlign: "center", width: "80rem", fontSize: "1.6rem", letterSpacing: "-1px", fontWeight: "500" }}>OFFICE OF THE REGISTRAR</Typography>
+                        <Typography style={{height: "2.5rem", marginLeft: "1rem", marginTop: "-0.5rem", width: "80rem", textAlign: "center", fontSize: "2.75rem", letterSpacing: "-1px", fontWeight: "600" }}>OFFICIAL TRANSCRIPT OF RECORDS</Typography>
                         <Box style={{ display: "flex", marginTop: "2rem" }}>
                             <Box>
-                                <Box style={{ display: "flex" }}>
+                                <Box style={{ display: "flex", height: "17.5rem", }}>
                                     <Box sx={{ padding: "1rem", marginLeft: "1rem", borderBottom: "solid black 1px", width: "80rem" }}>
                                         <Box>
                                             <Box style={{ display: "flex", width: "40rem" }}>
@@ -809,127 +846,135 @@ const settings = useContext(SettingsContext);
                                 </Box>
                                 {/* End of Header */}
                                 {/* Start of Main Content */}
-                                <Box style={{ display: "flex", marginLeft: "1rem", marginTop: "0.5rem", flexWrap: "wrap", borderTop: "solid black 1px", overflow: "hidden" }}>
-                                    <Box style={{ flex: "0 0 50%", marginBottom: "1rem", boxSizing: "border-box" }}>
-                                        <table >
-                                            <thead>
-                                                <tr style={{ display: "flex", height: "65px", borderBottom: "solid 1px black" }}>
-                                                    <td style={{ fontWeight: "600", fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", letterSpacing: "0.8px", width: "13rem" }}>
-                                                        <span>TERM</span>
-                                                    </td>
-                                                    <td style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "38rem" }}>
-                                                        <div style={{ margin: "-1px", fontWeight: "600", fontSize: "20px", textAlign: "center", letterSpacing: "-1px", width: "28rem" }}>SUBJECTS</div>
-                                                        <div style={{ margin: "-1px", fontWeight: "600", fontSize: "20px", textAlign: "center", letterSpacing: "-1px", width: "28rem", wordSpacing: "3px" }}>CODE NUMBER WITH DESCRIPTIVE TITLE</div>
-                                                    </td>
-                                                    <td>
-                                                        <div style={{ fontWeight: "600", textAlign: "center", fontSize: "20px", letterSpacing: "-1px", width: "13rem" }}>
-                                                            <span style={{ marginLeft: "-1.6rem" }}>GRADES</span>
-                                                        </div>
-                                                        <div style={{ display: "flex", alignItems: "center" }}>
-                                                            <div style={{ fontWeight: "600", fontSize: "20px", textAlign: "center", letterSpacing: "-1px", width: "6rem" }}>
-                                                                <span>FINAL</span>
+                                    <Box style={{ display: "flex", marginLeft: "1rem", marginTop: "0.5rem", flexWrap: "wrap", borderTop: "solid black 1px", overflow: "hidden" }}>
+                                        <Box style={{ flex: "0 0 50%", marginBottom: "1rem", boxSizing: "border-box" }}>
+                                            <table className="table" style={{minHeight: "67rem"}}>
+                                                <thead>
+                                                    <tr style={{ display: "flex", height: "65px", borderBottom: "solid 1px black" }}>
+                                                        <td style={{ fontWeight: "600", fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", letterSpacing: "0.8px", width: "13rem" }}>
+                                                            <span>TERM</span>
+                                                        </td>
+                                                        <td style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "38rem" }}>
+                                                            <div style={{ margin: "-1px", fontWeight: "600", fontSize: "20px", textAlign: "center", letterSpacing: "-1px", width: "28rem" }}>SUBJECTS</div>
+                                                            <div style={{ margin: "-1px", fontWeight: "600", fontSize: "20px", textAlign: "center", letterSpacing: "-1px", width: "28rem", wordSpacing: "3px" }}>CODE NUMBER WITH DESCRIPTIVE TITLE</div>
+                                                        </td>
+                                                        <td>
+                                                            <div style={{ fontWeight: "600", textAlign: "center", fontSize: "20px", letterSpacing: "-1px", width: "13rem" }}>
+                                                                <span style={{ marginLeft: "-1.6rem" }}>GRADES</span>
                                                             </div>
-                                                            <div style={{ textAlign: "center", fontWeight: "600", fontSize: "20px", marginLeft: "-2rem", letterSpacing: "-1px", width: "7rem" }}>
-                                                                <span>RE-EXAM</span>
+                                                            <div style={{ display: "flex", alignItems: "center" }}>
+                                                                <div style={{ fontWeight: "600", fontSize: "20px", textAlign: "center", letterSpacing: "-1px", width: "6rem" }}>
+                                                                    <span>FINAL</span>
+                                                                </div>
+                                                                <div style={{ textAlign: "center", fontWeight: "600", fontSize: "20px", marginLeft: "-2rem", letterSpacing: "-1px", width: "7rem" }}>
+                                                                    <span>RE-EXAM</span>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td style={{ fontWeight: "600", display: "flex", fontSize: "20px", alignItems: "center", justifyContent: "center", letterSpacing: "-1px", width: "7rem" }}>
-                                                        <span>CREDITS</span>
-                                                    </td>
-                                                    <td style={{ fontWeight: "600", display: "flex", fontSize: "20px", alignItems: "center", justifyContent: "center", letterSpacing: "-1px", width: "8.9rem" }}>
-                                                        <span>REMARKS</span>
-                                                    </td>
-                                                </tr>
-                                            </thead>
-                                            <tbody style={{ maxWidth: "650px", overflowY: "hidden" }}>
-                                                <tr>
-                                                    <td style={{ fontWeight: "500", textUnderlineOffset: "3px", textDecoration: "underline", letterSpacing: "-1px", paddingLeft: "1.5rem", fontSize: "20px" }}>{studentDetails[0]?.program_description?.toUpperCase()}</td>
-                                                </tr>
+                                                        </td>
+                                                        <td style={{ fontWeight: "600", display: "flex", fontSize: "20px", alignItems: "center", justifyContent: "center", letterSpacing: "-1px", width: "7rem" }}>
+                                                            <span>CREDITS</span>
+                                                        </td>
+                                                        <td style={{ fontWeight: "600", display: "flex", fontSize: "20px", alignItems: "center", justifyContent: "center", letterSpacing: "-1px", width: "8.9rem" }}>
+                                                            <span>REMARKS</span>
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody style={{ maxWidth: "650px", overflowY: "hidden" }}>
+                                                    <tr>
+                                                        <td style={{ fontWeight: "500", textUnderlineOffset: "3px", textDecoration: "underline", letterSpacing: "-1px", paddingLeft: "1.5rem", fontSize: "20px" }}>{studentDetails[0]?.program_description?.toUpperCase()}</td>
+                                                    </tr>
 
-                                                {pageGroups.map(group => (
-                                                    <React.Fragment key={group.termKey}>
-                                                        {group.subjects.map((p, index) => (
-                                                            <tr style={{ display: "flex" }} key={p.enrolled_id}>
-                                                                <td
-                                                                    style={{
-                                                                        width: "13rem",
-                                                                        fontWeight: "400",
-                                                                        display: "flex",
-                                                                        flexDirection: "column",
-                                                                        justifyContent: "center",
-                                                                        alignItems: "flex-start",
-                                                                        position: "relative",
-                                                                        paddingTop: index === 0 ? "0" : "0",
-                                                                    }}
-                                                                >
-                                                                    {index === 0 && (
-                                                                        <>
-                                                                            <span style={{ fontSize: "18px", textAlign: "center", width: "14rem" }}>
+                                                    {pageGroups.map(group => (
+                                                        <React.Fragment key={group.termKey}>
+                                                            {group.subjects.map((p, index) => (
+                                                                <tr style={{ display: "flex" }} key={p.enrolled_id}>
+                                                                    <td
+                                                                        style={{
+                                                                            width: "13rem",
+                                                                            fontWeight: "400",
+                                                                            display: "flex",
+                                                                            flexDirection: "column",
+                                                                            justifyContent: "center",
+                                                                            alignItems: "flex-start",
+                                                                            position: "relative",
+                                                                            paddingTop: index === 0 ? "0" : "0",
+                                                                        }}
+                                                                    >
+                                                                        {!group.isContinuation && index === 0 && (
+                                                                            <>
+                                                                                <span style={{ fontSize: "18px", textAlign: "center", width: "14rem" }}>
                                                                                 {p.semester_description}
-                                                                            </span>
-                                                                            <span style={{ fontSize: "17px", marginTop: "3rem", position: "absolute", textAlign: "center", width: "13.5rem" }}>
+                                                                                </span>
+                                                                                <span
+                                                                                style={{
+                                                                                    fontSize: "17px",
+                                                                                    marginTop: "3rem",
+                                                                                    position: "absolute",
+                                                                                    textAlign: "center",
+                                                                                    width: "13.5rem"
+                                                                                }}
+                                                                                >
                                                                                 {p.current_year} - {p.next_year}
-                                                                            </span>
-                                                                        </>
-                                                                    )}
-                                                                </td>
-                                                                <td style={{ display: "flex", width: "38rem" }}>
-                                                                    <span style={{ width: "90px", margin: "0", padding: "0", fontSize: "18px", letterSpacing: "-0.5px" }}>{p.course_code}</span>
-                                                                    <span style={{ marginLeft: "30px", padding: "0", fontSize: "18px", letterSpacing: "-0.5px" }}>{p.course_description.toUpperCase()}</span>
-                                                                </td>
-                                                                <td>
-                                                                    <div style={{ display: "flex", alignItems: "center" }}>
-                                                                        <div style={{ fontSize: "18px", width: "6rem", textAlign: "center" }}>
-                                                                            <span>{p.final_grade}</span>
+                                                                                </span>
+                                                                            </>
+                                                                        )}
+                                                                                                                                    </td>
+                                                                    <td style={{ display: "flex", width: "38rem" }}>
+                                                                        <span style={{ width: "90px", margin: "0", padding: "0", fontSize: "18px", letterSpacing: "-0.5px" }}>{p.course_code}</span>
+                                                                        <span style={{ marginLeft: "30px", padding: "0", fontSize: "18px", letterSpacing: "-0.5px" }}>{p.course_description.toUpperCase()}</span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style={{ display: "flex", alignItems: "center" }}>
+                                                                            <div style={{ fontSize: "18px", width: "6rem", textAlign: "center" }}>
+                                                                                <span>{p.final_grade}</span>
+                                                                            </div>
+                                                                            <div style={{ fontSize: "18px", textAlign: "center", width: "7rem", marginLeft: "-2rem" }}>
+                                                                                <span></span>
+                                                                            </div>
                                                                         </div>
-                                                                        <div style={{ fontSize: "18px", textAlign: "center", width: "7rem", marginLeft: "-2rem" }}>
-                                                                            <span></span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style={{ display: "flex", fontSize: "18px", alignItems: "center", width: "7rem", marginLeft: "1.7rem", justifyContent: "center" }}>
+                                                                            {totalUnitPerSubject(p.course_unit, p.lab_unit)}
                                                                         </div>
-                                                                    </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style={{ display: "flex", alignItems: "center", width: "8.9rem", fontSize: "18px", justifyContent: "center" }}>
+                                                                            {p.en_remarks === 0 ? "Incomplete" :
+                                                                                p.en_remarks === 1 ? "Passed" :
+                                                                                    p.en_remarks === 2 ? "Failed" :
+                                                                                        p.en_remarks === 3 ? "Incomplete" :
+                                                                                            p.en_remarks === 4 ? "Dropped" :
+                                                                                                ""
+                                                                            }
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+
+                                                            <tr style={{ display: "flex", marginTop: "-6px" }}>
+                                                                <td style={{ width: "12.8rem" }}>
+
+                                                                </td>
+                                                                <td style={{ width: "37.2rem" }}>
+
+                                                                </td>
+                                                                <td style={{ fontWeight: "600", fontSize: "18px" }}>
+                                                                    GWA: {(group.subjects.reduce((total, subj) => total + (Number(subj.final_grade) || 0), 0) / 8).toFixed(3)}
                                                                 </td>
                                                                 <td>
-                                                                    <div style={{ display: "flex", fontSize: "18px", alignItems: "center", width: "7rem", marginLeft: "1.7rem", justifyContent: "center" }}>
-                                                                        {totalUnitPerSubject(p.course_unit, p.lab_unit)}
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <div style={{ display: "flex", alignItems: "center", width: "8.9rem", fontSize: "18px", justifyContent: "center" }}>
-                                                                        {p.en_remarks === 0 ? "Incomplete" :
-                                                                            p.en_remarks === 1 ? "Passed" :
-                                                                                p.en_remarks === 2 ? "Failed" :
-                                                                                    p.en_remarks === 3 ? "Incomplete" :
-                                                                                        p.en_remarks === 4 ? "Dropped" :
-                                                                                            ""
-                                                                        }
-                                                                    </div>
                                                                 </td>
                                                             </tr>
-                                                        ))}
+                                                        </React.Fragment>
+                                                    ))}
 
-                                                        <tr style={{ display: "flex", marginTop: "-6px" }}>
-                                                            <td style={{ width: "12.8rem" }}>
-
-                                                            </td>
-                                                            <td style={{ width: "37.2rem" }}>
-
-                                                            </td>
-                                                            <td style={{ fontWeight: "600", fontSize: "18px" }}>
-                                                                GWA: {(group.subjects.reduce((total, subj) => total + (Number(subj.final_grade) || 0), 0) / 8).toFixed(3)}
-                                                            </td>
-                                                            <td>
-                                                            </td>
-                                                        </tr>
-                                                    </React.Fragment>
-                                                ))}
-
-                                            </tbody>
-                                        </table>
+                                                </tbody>
+                                            </table>
+                                        </Box>
                                     </Box>
-                                </Box>
                                 {/* End of Main Content */}
                                 {/* Start Of Footer */}
-                                <Box style={{ display: "flex", marginLeft: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
+                                <Box className="page-footer" style={{ display: "flex", marginLeft: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
                                     <Box style={{ flex: "0 0 50%", marginBottom: "1rem", boxSizing: "border-box" }}>
                                         <table >
                                             <thead>

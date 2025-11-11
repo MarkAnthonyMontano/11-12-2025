@@ -18,7 +18,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 const AssignEntranceExam = () => {
 
-const settings = useContext(SettingsContext);
+  const settings = useContext(SettingsContext);
 
   const [titleColor, setTitleColor] = useState("#000000");
   const [subtitleColor, setSubtitleColor] = useState("#555555");
@@ -55,7 +55,7 @@ const settings = useContext(SettingsContext);
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
   const tabs = [
     {
@@ -133,20 +133,23 @@ const settings = useContext(SettingsContext);
   const [loading, setLoading] = useState(false);
   const pageId = 9;
 
-  //
+  const [employeeID, setEmployeeID] = useState("");
+
   useEffect(() => {
 
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -155,9 +158,9 @@ const settings = useContext(SettingsContext);
     }
   }, []);
 
-  const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
       if (response.data && response.data.page_privilege === 1) {
         setHasAccess(true);
       } else {
@@ -174,6 +177,7 @@ const settings = useContext(SettingsContext);
       setLoading(false);
     }
   };
+
 
   const handleSaveSchedule = async (e) => {
     e.preventDefault();
@@ -310,8 +314,8 @@ const settings = useContext(SettingsContext);
               justifyContent: "center",
               cursor: "pointer",
               borderRadius: 2,
-                 border: `2px solid ${borderColor}`, 
-                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+              border: `2px solid ${borderColor}`,
+              backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
               color: activeStep === index ? "#fff" : "#000",
               boxShadow:
                 activeStep === index
@@ -356,7 +360,7 @@ const settings = useContext(SettingsContext);
             fontWeight="bold"
             mb={2}
             textAlign="center"
-            sx={{color: subtitleColor}}
+            sx={{ color: subtitleColor }}
           >
             ADD SCHEDULE
           </Typography>

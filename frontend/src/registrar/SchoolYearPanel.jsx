@@ -44,33 +44,36 @@ const SchoolYearPanel = () => {
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
-// Also put it at the very top
-const [userID, setUserID] = useState("");
-const [user, setUser] = useState("");
-const [userRole, setUserRole] = useState("");
+  // Also put it at the very top
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
 
-const [hasAccess, setHasAccess] = useState(null);
-const [loading, setLoading] = useState(false);
+  const [hasAccess, setHasAccess] = useState(null);
+  const [loading, setLoading] = useState(false);
 
 
-const pageId = 58;
+  const pageId = 58;
 
-//Put this After putting the code of the past code
-useEffect(() => {
-    
+  const [employeeID, setEmployeeID] = useState("");
+
+  useEffect(() => {
+
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedID = localStorage.getItem("person_id");
+    const storedEmployeeID = localStorage.getItem("employee_id");
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
+      setEmployeeID(storedEmployeeID);
 
       if (storedRole === "registrar") {
-        checkAccess(storedID);
+        checkAccess(storedEmployeeID);
       } else {
         window.location.href = "/login";
       }
@@ -79,26 +82,25 @@ useEffect(() => {
     }
   }, []);
 
-const checkAccess = async (userID) => {
+  const checkAccess = async (employeeID) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
-        if (response.data && response.data.page_privilege === 1) {
-          setHasAccess(true);
-        } else {
-          setHasAccess(false);
-        }
-    } catch (error) {
-        console.error('Error checking access:', error);
+      const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
+      if (response.data && response.data.page_privilege === 1) {
+        setHasAccess(true);
+      } else {
         setHasAccess(false);
-        if (error.response && error.response.data.message) {
-          console.log(error.response.data.message);
-        } else {
-          console.log("An unexpected error occurred.");
-        }
-        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error checking access:', error);
+      setHasAccess(false);
+      if (error.response && error.response.data.message) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("An unexpected error occurred.");
+      }
+      setLoading(false);
     }
   };
-
 
 
 
@@ -169,7 +171,7 @@ const checkAccess = async (userID) => {
     return activatorValue === 1 ? "Active" : "Inactive";
   };
 
-   // 🔒 Disable right-click
+  // 🔒 Disable right-click
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // 🔒 Block DevTools shortcuts + Ctrl+P silently
@@ -189,10 +191,10 @@ const checkAccess = async (userID) => {
 
 
 
-// Put this at the very bottom before the return 
-if (loading || hasAccess === null) {
-   return <LoadingOverlay open={loading} message="Check Access"/>;
-}
+  // Put this at the very bottom before the return 
+  if (loading || hasAccess === null) {
+    return <LoadingOverlay open={loading} message="Check Access" />;
+  }
 
   if (!hasAccess) {
     return (
@@ -203,15 +205,15 @@ if (loading || hasAccess === null) {
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
-  <Box
+      <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
- 
+
           mb: 2,
-        
+
         }}
       >
         <Typography
@@ -222,10 +224,10 @@ if (loading || hasAccess === null) {
             fontSize: '36px',
           }}
         >
-      SCHOOL YEAR PANEL
+          SCHOOL YEAR PANEL
         </Typography>
 
-      
+
 
 
       </Box>
@@ -238,13 +240,13 @@ if (loading || hasAccess === null) {
           flex: 1,
           p: 3,
           bgcolor: "#fff",
-          border: `2px solid ${borderColor}`, 
+          border: `2px solid ${borderColor}`,
           boxShadow: 2,
           width: 800,
           borderRadius: 2,
           minWidth: "300px"
         }}>
-          <Typography variant="h6" mb={2} style={{color: subtitleColor, }}>
+          <Typography variant="h6" mb={2} style={{ color: subtitleColor, }}>
             Add New School Year
           </Typography>
           <form onSubmit={handleSubmit} className="grid gap-4">
@@ -283,7 +285,7 @@ if (loading || hasAccess === null) {
             <button
               type="submit"
               className="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded"
-              style={{   backgroundColor: "#1967d2",}}
+              style={{ backgroundColor: "#1967d2", }}
             >
               Save
             </button>
@@ -297,30 +299,30 @@ if (loading || hasAccess === null) {
           p: 3,
           bgcolor: "#fff",
           boxShadow: 2,
-          border: `2px solid ${borderColor}`, 
+          border: `2px solid ${borderColor}`,
           borderRadius: 2,
           minWidth: "300px"
         }}>
-          <Typography variant="h6" mb={2} style={{color: subtitleColor, }}>
+          <Typography variant="h6" mb={2} style={{ color: subtitleColor, }}>
             Saved School Years
           </Typography>
           <Box sx={{ maxHeight: 350, overflowY: "auto" }}>
-            <table style={{border: `2px solid ${borderColor}`}} className="w-full border border-gray-300 text-sm">
+            <table style={{ border: `2px solid ${borderColor}` }} className="w-full border border-gray-300 text-sm">
               <thead>
-                <tr style={{backgroundColor: settings?.header_color || "#1976d2", color: "#ffffff"}} className="bg-gray-200">
-                  <th style={{border: `2px solid ${borderColor}`}} className="p-2 border">Year Level</th>
-                  <th style={{border: `2px solid ${borderColor}`}} className="p-2 border">Semester</th>
-                  <th style={{border: `2px solid ${borderColor}`}} className="p-2 border">Status</th>
+                <tr style={{ backgroundColor: settings?.header_color || "#1976d2", color: "#ffffff" }} className="bg-gray-200">
+                  <th style={{ border: `2px solid ${borderColor}` }} className="p-2 border">Year Level</th>
+                  <th style={{ border: `2px solid ${borderColor}` }} className="p-2 border">Semester</th>
+                  <th style={{ border: `2px solid ${borderColor}` }} className="p-2 border">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {schoolYears.map((sy, index) => (
                   <tr key={index}>
-                    <td style={{border: `2px solid ${borderColor}`}} className="p-2 border text-center">
+                    <td style={{ border: `2px solid ${borderColor}` }} className="p-2 border text-center">
                       {`${sy.year_description}-${parseInt(sy.year_description) + 1}`}
                     </td>
-                    <td style={{border: `2px solid ${borderColor}`}} className="p-2 border text-center">{sy.semester_description}</td>
-                    <td style={{border: `2px solid ${borderColor}`}} className="p-2 border text-center">{getStatus(sy.astatus)}</td>
+                    <td style={{ border: `2px solid ${borderColor}` }} className="p-2 border text-center">{sy.semester_description}</td>
+                    <td style={{ border: `2px solid ${borderColor}` }} className="p-2 border text-center">{getStatus(sy.astatus)}</td>
                   </tr>
                 ))}
               </tbody>

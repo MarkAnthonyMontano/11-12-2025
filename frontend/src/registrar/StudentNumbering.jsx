@@ -92,20 +92,23 @@ const StudentNumbering = () => {
 
     const pageId = 62;
 
-    //Put this After putting the code of the past code
+    const [employeeID, setEmployeeID] = useState("");
+
     useEffect(() => {
 
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
+        const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
+            setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
-                checkAccess(storedID);
+                checkAccess(storedEmployeeID);
             } else {
                 window.location.href = "/login";
             }
@@ -114,9 +117,9 @@ const StudentNumbering = () => {
         }
     }, []);
 
-    const checkAccess = async (userID) => {
+    const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/page_access/${userID}/${pageId}`);
+            const response = await axios.get(`http://localhost:5000/api/page_access/${employeeID}/${pageId}`);
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
@@ -657,7 +660,7 @@ const StudentNumbering = () => {
 
             <br />
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`,}}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
                     <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
                         <TableRow>
@@ -801,9 +804,9 @@ const StudentNumbering = () => {
                             <TableCell
                                 colSpan={10}
                                 sx={{
-                                   border: `2px solid ${borderColor}`,
+                                    border: `2px solid ${borderColor}`,
                                     py: 0.5,
-                                 backgroundColor: settings?.header_color || "#1976d2",
+                                    backgroundColor: settings?.header_color || "#1976d2",
                                     color: "white"
                                 }}
                             >
@@ -983,7 +986,7 @@ const StudentNumbering = () => {
                                 p: 1,
                                 mb: 0.5,
 
-                              border: `2px solid ${borderColor}`,
+                                border: `2px solid ${borderColor}`,
                                 cursor: 'pointer',
                                 backgroundColor:
                                     selectedPerson?.person_id === person.person_id ? '#800000' : 'white',
