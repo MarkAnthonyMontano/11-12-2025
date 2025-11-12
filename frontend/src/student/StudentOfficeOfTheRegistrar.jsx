@@ -10,41 +10,41 @@ import { useLocation } from "react-router-dom";
 const StudentOfficeOfTheRegistrar = () => {
     const settings = useContext(SettingsContext);
 
-  const [titleColor, setTitleColor] = useState("#000000");
-  const [subtitleColor, setSubtitleColor] = useState("#555555");
-  const [borderColor, setBorderColor] = useState("#000000");
-  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [subtitleColor, setSubtitleColor] = useState("#555555");
+    const [borderColor, setBorderColor] = useState("#000000");
+    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
+    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
 
-  const [fetchedLogo, setFetchedLogo] = useState(null);
-  const [companyName, setCompanyName] = useState("");
-  const [shortTerm, setShortTerm] = useState("");
+    const [fetchedLogo, setFetchedLogo] = useState(null);
+    const [companyName, setCompanyName] = useState("");
+    const [shortTerm, setShortTerm] = useState("");
 
-  useEffect(() => {
-    if (!settings) return;
+    useEffect(() => {
+        if (!settings) return;
 
-    // 🎨 Colors
-    if (settings.title_color) setTitleColor(settings.title_color);
-    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-    if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+        // 🎨 Colors
+        if (settings.title_color) setTitleColor(settings.title_color);
+        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+        if (settings.border_color) setBorderColor(settings.border_color);
+        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
 
-    // 🏫 Logo
-    if (settings.logo_url) {
-      setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
-    } else {
-      setFetchedLogo(EaristLogo);
-    }
+        // 🏫 Logo
+        if (settings.logo_url) {
+            setFetchedLogo(`http://localhost:5000${settings.logo_url}`);
+        } else {
+            setFetchedLogo(EaristLogo);
+        }
 
-    // 🏷️ School Information
-    if (settings.company_name) setCompanyName(settings.company_name);
-    if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
+        // 🏷️ School Information
+        if (settings.company_name) setCompanyName(settings.company_name);
+        if (settings.short_term) setShortTerm(settings.short_term);
+        if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+    }, [settings]);
 
     const words = companyName.trim().split(" ");
     const middleIndex = Math.ceil(words.length / 2);
@@ -103,9 +103,24 @@ const StudentOfficeOfTheRegistrar = () => {
         father_family_name: "", father_given_name: "", father_middle_name: "", father_ext: "", father_contact: "", father_occupation: "",
         father_income: "", father_email: "", mother_family_name: "", mother_given_name: "", mother_middle_name: "",
         mother_contact: "", mother_occupation: "", mother_income: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
-        guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", generalAverage1: "",
+        guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
+        schoolLevel: "",
+        schoolLastAttended: "",
+        schoolAddress: "",
+        courseProgram: "",
+        honor: "",
+        generalAverage: "",
+        yearGraduated: "",
+        schoolLevel1: "",
+        schoolLastAttended1: "",
+        schoolAddress1: "",
+        courseProgram1: "",
+        honor1: "",
+        generalAverage1: "",
+        yearGraduated1: "",
+        strand: "",
+        created_at: "",
     });
-
 
 
     const [campusAddress, setCampusAddress] = useState("");
@@ -255,7 +270,7 @@ const StudentOfficeOfTheRegistrar = () => {
     }
 
 
- 
+
     // 🔒 Disable right-click
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -273,7 +288,7 @@ const StudentOfficeOfTheRegistrar = () => {
         }
     });
 
-    return (
+ return (
         <Box
             sx={{
                 height: "calc(100vh - 150px)",
@@ -295,7 +310,7 @@ const StudentOfficeOfTheRegistrar = () => {
                     variant="h4"
                     sx={{
                         fontWeight: "bold",
-                  color: titleColor,
+                        color: titleColor,
                         fontSize: "36px",
                     }}
                 >
@@ -2004,7 +2019,7 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Name of School:
+                                    Name of School:       {person.schoolLastAttended}
                                 </td>
 
                                 <td
@@ -2022,6 +2037,7 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
+                              
 
                                 </td>
                                 <td
@@ -2062,7 +2078,7 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Address:
+                                    Address: {person.schoolAddress}
                                 </td>
 
                                 <td
@@ -2266,7 +2282,7 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Name of School:
+                                    Name of School: {person.schoolLastAttended1}
                                 </td>
 
                                 <td
@@ -2324,7 +2340,7 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Address:
+                                    Address: {person.schoolAddress1}
                                 </td>
 
                                 <td
@@ -2781,7 +2797,7 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Name of School:
+                                    Name of School: {settings?.company_name || companyName}
 
                                 </td>
                                 <td
@@ -2854,7 +2870,10 @@ const StudentOfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Address:
+                                    Address:      
+                                        
+                                            {campusAddress}
+                                    
 
                                 </td>
                                 <td

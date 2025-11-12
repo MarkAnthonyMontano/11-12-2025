@@ -256,7 +256,7 @@ const ExamPermit = ({ personId }) => {
 `}</style>
 
             {/* Header */}
-            <table width="100%" style={{ borderCollapse: "collapse", marginTop: "-40px", fontFamily: "Arial" }}>
+            <table width="100%" style={{ borderCollapse: "collapse", marginTop: "-10px", fontFamily: "Arial" }}>
                 <tbody>
                     <tr>
 

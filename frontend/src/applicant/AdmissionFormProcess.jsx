@@ -9,8 +9,8 @@ import { useLocation } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 
 const AdmissionFormProcess = () => {
-  
-const settings = useContext(SettingsContext);
+
+  const settings = useContext(SettingsContext);
 
   const [titleColor, setTitleColor] = useState("#000000");
   const [subtitleColor, setSubtitleColor] = useState("#555555");
@@ -22,7 +22,7 @@ const settings = useContext(SettingsContext);
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
- 
+
   useEffect(() => {
     if (!settings) return;
 
@@ -46,7 +46,7 @@ const settings = useContext(SettingsContext);
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
 
-  }, [settings]); 
+  }, [settings]);
 
 
 
@@ -333,40 +333,40 @@ const settings = useContext(SettingsContext);
 
 
 
-return (
-  <Box
-    sx={{
-      height: "calc(100vh - 150px)",
-      overflowY: "auto",
-      paddingRight: 1,
-      backgroundColor: "transparent",
-    }}
-  >
+  return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        mb: 2,
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
       }}
     >
-      <Typography
-        variant="h4"
+      <Box
         sx={{
-          fontWeight: "bold",
-          color: titleColor,
-          fontSize: "36px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          mb: 2,
         }}
       >
-        ADMISSION FORM (PROCESS)
-      </Typography>
-    </Box>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            color: titleColor,
+            fontSize: "36px",
+          }}
+        >
+          ADMISSION FORM (PROCESS)
+        </Typography>
+      </Box>
 
-    <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-    <br />
+      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+      <br />
 
-  <button
+      <button
         onClick={printDiv}
         style={{
           marginBottom: "1rem",
@@ -394,7 +394,7 @@ return (
           }}
         >
           <FcPrint size={20} />
-        Print Admission Form 
+          Print Admission Form
         </span>
       </button>
 
@@ -597,14 +597,14 @@ return (
           <br />
           <br />
           <table
-          
+
             style={{
               borderCollapse: "collapse",
               fontFamily: "Arial, Helvetica, sans-serif",
               width: "8in",
               margin: "0 auto",
 
-
+              marginTop: "-30px",
               textAlign: "center",
               tableLayout: "fixed",
             }}
@@ -876,7 +876,7 @@ return (
 
               {/* Degree/Program & Major */}
               <tr style={{ fontSize: "13px" }}>
-                <td colSpan={30} style={{ verticalAlign: "top" }}>
+                <td colSpan={25} style={{ verticalAlign: "top" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
                     <label
                       style={{
@@ -909,7 +909,7 @@ return (
                   </div>
                 </td>
 
-                <td colSpan={10} style={{ verticalAlign: "top" }}>
+                <td colSpan={15} style={{ verticalAlign: "top" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
                     <label
                       style={{
@@ -1383,14 +1383,14 @@ return (
           <br />
           <br />
           <table
-         
+
             style={{
               borderCollapse: "collapse",
               fontFamily: "Arial, Helvetica, sans-serif",
               width: "8in",
               margin: "0 auto",
 
-
+              marginTop: "-30px",
               textAlign: "center",
               tableLayout: "fixed",
             }}
@@ -1662,7 +1662,7 @@ return (
 
               {/* Degree/Program & Major */}
               <tr style={{ fontSize: "13px" }}>
-                <td colSpan={30} style={{ verticalAlign: "top" }}>
+                <td colSpan={25} style={{ verticalAlign: "top" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
                     <label
                       style={{
@@ -1695,7 +1695,7 @@ return (
                   </div>
                 </td>
 
-                <td colSpan={10} style={{ verticalAlign: "top" }}>
+                <td colSpan={15} style={{ verticalAlign: "top" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
                     <label
                       style={{
@@ -1728,6 +1728,7 @@ return (
                   </div>
                 </td>
               </tr>
+
 
 
 

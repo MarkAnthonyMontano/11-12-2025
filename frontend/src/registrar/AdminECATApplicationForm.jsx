@@ -56,59 +56,75 @@ const ECATApplicationForm = () => {
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
   const [person, setPerson] = useState({
-
-    profile_img: "",
-    campus: "",
-    academicProgram: "",
-    classifiedAs: "",
-    program: "",
-    program2: "",
-    program3: "",
-    yearLevel: "",
-    last_name: "",
-    first_name: "",
-    middle_name: "",
-    extension: "",
-    nickname: "",
-    height: "",
-    weight: "",
-    lrnNumber: "",
-    gender: "",
-    pwdType: "",
-    pwdId: "",
-    birthOfDate: "",
-    age: "",
-    birthPlace: "",
-    languageDialectSpoken: "",
-    citizenship: "",
-    religion: "",
-    civilStatus: "",
-    tribeEthnicGroup: "",
-    otherEthnicGroup: "",
-    cellphoneNumber: "",
-    emailAddress: "",
-    telephoneNumber: "",
-    facebookAccount: "",
-    presentStreet: "",
-    presentBarangay: "",
-    presentZipCode: "",
-    presentRegion: "",
-    presentProvince: "",
-    presentMunicipality: "",
-    presentDswdHouseholdNumber: "",
-    permanentStreet: "",
-    permanentBarangay: "",
-    permanentZipCode: "",
-    permanentRegion: "",
-    permanentProvince: "",
-    permanentMunicipality: "",
-    permanentDswdHouseholdNumber: "",
-    father_deceased: "",
-    father_family_name: "", father_given_name: "", father_middle_name: "", father_ext: "", father_contact: "", father_occupation: "",
-    father_income: "", father_email: "", mother_deceased: "", mother_family_name: "", mother_given_name: "", mother_middle_name: "",
-    mother_contact: "", mother_occupation: "", mother_income: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
-    guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
-  });
+  
+      profile_img: "",
+      campus: "",
+      academicProgram: "",
+      classifiedAs: "",
+      program: "",
+      program2: "",
+      program3: "",
+      yearLevel: "",
+      last_name: "",
+      first_name: "",
+      middle_name: "",
+      extension: "",
+      nickname: "",
+      height: "",
+      weight: "",
+      lrnNumber: "",
+      gender: "",
+      pwdType: "",
+      pwdId: "",
+      birthOfDate: "",
+      age: "",
+      birthPlace: "",
+      languageDialectSpoken: "",
+      citizenship: "",
+      religion: "",
+      civilStatus: "",
+      tribeEthnicGroup: "",
+      otherEthnicGroup: "",
+      cellphoneNumber: "",
+      emailAddress: "",
+      telephoneNumber: "",
+      facebookAccount: "",
+      presentStreet: "",
+      presentBarangay: "",
+      presentZipCode: "",
+      presentRegion: "",
+      presentProvince: "",
+      presentMunicipality: "",
+      presentDswdHouseholdNumber: "",
+      permanentStreet: "",
+      permanentBarangay: "",
+      permanentZipCode: "",
+      permanentRegion: "",
+      permanentProvince: "",
+      permanentMunicipality: "",
+      permanentDswdHouseholdNumber: "",
+      father_deceased: "",
+      father_family_name: "", father_given_name: "", father_middle_name: "", father_ext: "", father_contact: "", father_occupation: "",
+      father_income: "", father_email: "", mother_deceased: "", mother_family_name: "", mother_given_name: "", mother_middle_name: "",
+      mother_contact: "", mother_occupation: "", mother_income: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
+      guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
+      schoolLevel: "",
+      schoolLastAttended: "",
+      schoolAddress: "",
+      courseProgram: "",
+      honor: "",
+      generalAverage: "",
+      yearGraduated: "",
+      schoolLevel1: "",
+      schoolLastAttended1: "",
+      schoolAddress1: "",
+      courseProgram1: "",
+      honor1: "",
+      generalAverage1: "",
+      yearGraduated1: "",
+      strand: "",
+    });
+  
 
 
   const [campusAddress, setCampusAddress] = useState("");
@@ -286,87 +302,87 @@ const ECATApplicationForm = () => {
 
 
 
-return (
-  <Box
-    sx={{
-      height: "calc(100vh - 150px)",
-      overflowY: "auto",
-      paddingRight: 1,
-      backgroundColor: "transparent",
-    }}
-  >
-    <div ref={divToPrintRef}>
-      <div>
-        <style>
-          {`
+ return (
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+      }}
+    >
+      <div ref={divToPrintRef}>
+        <div>
+          <style>
+            {`
             @media print {
               button {
                 display: none;
               }
             }
           `}
-        </style>
-      </div>
+          </style>
+        </div>
 
-      {/* ✅ HEADER - Full layout like ApplicantResetPassword */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          flexWrap: "wrap",
-          mb: 2,
-        }}
-      >
-        <Typography
-          variant="h4"
+        {/* ✅ HEADER - Full layout like ApplicantResetPassword */}
+        <Box
           sx={{
-            fontWeight: "bold",
-            color: titleColor,
-            fontSize: "36px",
-            textAlign: "left",
-          }}
-        >
-         ECAT APPLICATION FORM
-        </Typography>
-      </Box>
-
-      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <br />
-
-      {/* ✅ PRINT BUTTON (unchanged) */}
-      <button
-        onClick={printDiv}
-        style={{
-          marginBottom: "1rem",
-          padding: "10px 20px",
-          border: "2px solid black",
-          backgroundColor: "#f0f0f0",
-          color: "black",
-          borderRadius: "5px",
-          marginTop: "20px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontWeight: "bold",
-          transition: "background-color 0.3s, transform 0.2s",
-        }}
-        onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-        onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-      >
-        <span
-          style={{
             display: "flex",
+            justifyContent: "flex-start",
             alignItems: "center",
-            gap: "8px",
+            flexWrap: "wrap",
+            mb: 2,
           }}
         >
-          <FcPrint size={20} />
-          Print ECAT Application Form
-        </span>
-      </button>
-     
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: "bold",
+              color: titleColor,
+              fontSize: "36px",
+              textAlign: "left",
+            }}
+          >
+            ECAT APPLICATION FORM
+          </Typography>
+        </Box>
+
+        <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+        <br />
+
+        {/* ✅ PRINT BUTTON (unchanged) */}
+        <button
+          onClick={printDiv}
+          style={{
+            marginBottom: "1rem",
+            padding: "10px 20px",
+            border: "2px solid black",
+            backgroundColor: "#f0f0f0",
+            color: "black",
+            borderRadius: "5px",
+            marginTop: "20px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "bold",
+            transition: "background-color 0.3s, transform 0.2s",
+          }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+          onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+          onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+        >
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <FcPrint size={20} />
+            Print ECAT Application Form
+          </span>
+        </button>
+
         <table
           className="student-table"
           style={{
@@ -609,6 +625,11 @@ return (
                         item?.curriculum_id?.toString() === (person?.program ?? "").toString()
                     )?.program_description || (person?.program ?? "")
                     : "Loading..."}
+                  <br />
+                  {curriculumOptions.find(
+                    (c) =>
+                      c.curriculum_id?.toString() === (person?.program ?? "").toString()
+                  )?.major || ""}
                 </div>
               </td>
             </tr>
@@ -682,11 +703,14 @@ return (
                       Year Graduated:
                       <input
                         type="text"
+                        value={person.yearGraduated1}
+                        readOnly
                         style={{
                           border: "none",
                           borderBottom: "1px solid black",
                           width: "150px",
                           marginLeft: "15px",
+                          textAlign: "center",
                           fontSize: "12px",
                           fontFamily: "Arial, sans-serif",
                           background: "none",
@@ -695,6 +719,7 @@ return (
                       />
                     </div>
                   </div>
+
 
                   {/* Row 3 */}
                   <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -1212,12 +1237,19 @@ return (
                     style={{
                       flex: 1,
                       borderBottom: "1px solid black",
-                      minHeight: "18px", // ensures visible line even if no text
+                      minHeight: "18px", // visible line even without text
+                      textAlign: "center", // centers text
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "Arial, sans-serif",
+                      fontSize: "12px",
                     }}
                   >
-
+                    {person.schoolLastAttended1 || ""}
                   </span>
                 </div>
+
               </td>
             </tr>
 
@@ -1231,9 +1263,12 @@ return (
                     display: "inline-block",
                     width: "231px",
                     marginLeft: "10px",
+                    textAlign: "center",
+                    fontFamily: "Arial, sans-serif",
+                    fontSize: "12px",
                   }}
                 >
-
+                  {person.schoolAddress1 || ""}
                 </span>
                 <b style={{ marginLeft: "10px" }}>Learner's Reference No.:</b>
                 <span
@@ -1242,9 +1277,12 @@ return (
                     display: "inline-block",
                     width: "268px",
                     marginLeft: "10px",
+                    textAlign: "center",
+                    fontFamily: "Arial, sans-serif",
+                    fontSize: "12px",
                   }}
                 >
-                  {person.lrnNumber}
+                  {person.lrnNumber || ""}
                 </span>
               </td>
             </tr>
@@ -1445,8 +1483,10 @@ return (
                   verticalAlign: "top",
                 }}
               >
-                This document is a sole property of Eulogio "Amang" Rodriguez Institute of Science and Technology (EARIST, Manila).
-                Any disclosure, unauthorized reproduction or use is strictly prohibited except with permission from EARIST Manila.
+                This document is a sole property of Eulogio "Amang" Rodriguez Institute of Science and Technology ({settings?.short_term || shortTerm}, {person.campus === 2 ? "Cavite" : "Manila"}).
+                Any disclosure, unauthorized reproduction or use is strictly prohibited except with permission from {settings?.short_term || shortTerm} {person.campus === 2 ? "Cavite" : "Manila"}.
+
+
               </td>
               <td
                 colSpan={5}

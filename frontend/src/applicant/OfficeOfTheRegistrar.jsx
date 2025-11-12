@@ -11,7 +11,7 @@ const OfficeOfTheRegistrar = () => {
 
     const settings = useContext(SettingsContext);
 
-   
+
     const [titleColor, setTitleColor] = useState("#000000");
     const [subtitleColor, setSubtitleColor] = useState("#555555");
     const [borderColor, setBorderColor] = useState("#000000");
@@ -108,7 +108,22 @@ const OfficeOfTheRegistrar = () => {
         father_family_name: "", father_given_name: "", father_middle_name: "", father_ext: "", father_contact: "", father_occupation: "",
         father_income: "", father_email: "", mother_family_name: "", mother_given_name: "", mother_middle_name: "",
         mother_contact: "", mother_occupation: "", mother_income: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
-        guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", generalAverage1: "",
+        guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
+        schoolLevel: "",
+        schoolLastAttended: "",
+        schoolAddress: "",
+        courseProgram: "",
+        honor: "",
+        generalAverage: "",
+        yearGraduated: "",
+        schoolLevel1: "",
+        schoolLastAttended1: "",
+        schoolAddress1: "",
+        courseProgram1: "",
+        honor1: "",
+        generalAverage1: "",
+        yearGraduated1: "",
+        strand: "",
         created_at: "",
     });
 
@@ -291,7 +306,7 @@ const OfficeOfTheRegistrar = () => {
                     variant="h4"
                     sx={{
                         fontWeight: "bold",
-                       color: titleColor,
+                        color: titleColor,
                         fontSize: "36px",
                     }}
                 >
@@ -2000,7 +2015,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Name of School:
+                                    Name of School:       {person.schoolLastAttended}
                                 </td>
 
                                 <td
@@ -2018,6 +2033,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
+                              
 
                                 </td>
                                 <td
@@ -2058,7 +2074,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Address:
+                                    Address: {person.schoolAddress}
                                 </td>
 
                                 <td
@@ -2262,7 +2278,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Name of School:
+                                    Name of School: {person.schoolLastAttended1}
                                 </td>
 
                                 <td
@@ -2320,7 +2336,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Address:
+                                    Address: {person.schoolAddress1}
                                 </td>
 
                                 <td
@@ -2777,7 +2793,7 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Name of School:
+                                    Name of School: {settings?.company_name || companyName}
 
                                 </td>
                                 <td
@@ -2850,7 +2866,10 @@ const OfficeOfTheRegistrar = () => {
 
                                     }}
                                 >
-                                    Address:
+                                    Address:      
+                                        
+                                            {campusAddress}
+                                    
 
                                 </td>
                                 <td
